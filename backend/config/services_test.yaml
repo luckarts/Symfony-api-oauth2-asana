@@ -1,0 +1,8 @@
+services:
+    # Setup test client in ClientManager when using in-memory persistence
+    App\Auth\Infrastructure\OAuth2\TestClientManagerSetup:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: setupTestClient, priority: 1000 }
+        arguments:
+            - '@league.oauth2_server.manager.in_memory.client'
+            - '@event_dispatcher'
