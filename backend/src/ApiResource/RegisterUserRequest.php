@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\ApiResource;
+
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use App\State\Processor\RegisterProcessor;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ApiResource(
+    shortName: 'Register',
+    operations: [
+        new Post(
+            uriTemplate: '/register',
+            processor: RegisterProcessor::class,
+            output: UserProfile::class,
+        ),
+    ],
+    routePrefix: '/api',
+)]
+class RegisterUserRequest
+{
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    public string $email = '';
+
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 8)]
+    public string $password = '';
+
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
+    public string $firstName = '';
+
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
+    public string $lastName = '';
+}
