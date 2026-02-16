@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\Role;
+use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\UniqueConstraint(name: 'uniq_users_email', columns: ['email'])]
 #[ORM\HasLifecycleCallbacks]
@@ -16,7 +17,9 @@ class User
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid')]
-    private Uuid $id;
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    private ?Uuid $id = null;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $email;
@@ -42,12 +45,11 @@ class User
 
     public function __construct()
     {
-        $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function getId(): Uuid
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
