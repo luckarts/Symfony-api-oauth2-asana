@@ -6,6 +6,7 @@ namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Shared\Infrastructure\Mapper\EntityDtoMapper;
 use App\User\Application\Service\UserRegistrationService;
 use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
 use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
@@ -17,6 +18,7 @@ class RegisterProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly UserRegistrationService $registrationService,
+        private readonly EntityDtoMapper $mapper,
     ) {
     }
 
@@ -31,6 +33,6 @@ class RegisterProcessor implements ProcessorInterface
             $data->lastName,
         );
 
-        return UserProfile::fromUser($user);
+        return $this->mapper->toDto($user, UserProfile::class);
     }
 }

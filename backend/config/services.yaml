@@ -25,6 +25,12 @@ services:
         exclude:
             - '../src/User/Domain/Entity/'
 
+    # --- Mapping infrastructure ---
+    App\Shared\Infrastructure\Mapper\MappingConfigLoader:
+        arguments:
+            $configDirs:
+                - '%kernel.project_dir%/src/User/Infrastructure/ApiPlatform/Config'
+
     # --- Contract bindings (interface → implementation) ---
     App\User\Domain\Contract\UserRepositoryInterface:
         alias: App\User\Infrastructure\Doctrine\DoctrineUserRepository

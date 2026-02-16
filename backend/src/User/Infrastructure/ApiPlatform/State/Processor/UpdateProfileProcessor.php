@@ -7,6 +7,7 @@ namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Security\SecurityUser;
+use App\Shared\Infrastructure\Mapper\EntityDtoMapper;
 use App\User\Application\Service\UserProfileService;
 use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -19,6 +20,7 @@ class UpdateProfileProcessor implements ProcessorInterface
     public function __construct(
         private readonly UserProfileService $profileService,
         private readonly Security $security,
+        private readonly EntityDtoMapper $mapper,
     ) {
     }
 
@@ -35,6 +37,6 @@ class UpdateProfileProcessor implements ProcessorInterface
             $data->lastName,
         );
 
-        return UserProfile::fromUser($user);
+        return $this->mapper->toDto($user, UserProfile::class);
     }
 }
