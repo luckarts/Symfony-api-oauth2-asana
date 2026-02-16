@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Entity;
+namespace App\User\Domain\Entity;
 
-use App\Enum\Role;
-use App\Repository\UserRepository;
+use App\User\Domain\Enum\Role;
+use App\User\Infrastructure\Doctrine\DoctrineUserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Entity(repositoryClass: DoctrineUserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\UniqueConstraint(name: 'uniq_users_email', columns: ['email'])]
 #[ORM\HasLifecycleCallbacks]

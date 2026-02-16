@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\ApiResource;
+namespace App\User\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
-use App\State\Processor\RegisterProcessor;
+use App\User\Infrastructure\ApiPlatform\State\Processor\RegisterProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(

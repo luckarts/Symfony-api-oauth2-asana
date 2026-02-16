@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\State\Provider;
+namespace App\User\Infrastructure\ApiPlatform\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\ApiResource\UserProfile;
 use App\Security\SecurityUser;
+use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**

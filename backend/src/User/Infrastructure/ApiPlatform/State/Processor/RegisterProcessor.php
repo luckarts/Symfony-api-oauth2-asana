@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\State\Processor;
+namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\ApiResource\RegisterUserRequest;
-use App\ApiResource\UserProfile;
-use App\Service\UserRegistrationService;
+use App\User\Application\Service\UserRegistrationService;
+use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
+use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
 
 /**
  * @implements ProcessorInterface<RegisterUserRequest, UserProfile>

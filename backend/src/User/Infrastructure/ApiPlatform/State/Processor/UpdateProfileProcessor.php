@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\State\Processor;
+namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\ApiResource\UserProfile;
 use App\Security\SecurityUser;
-use App\Service\UserProfileService;
+use App\User\Application\Service\UserProfileService;
+use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**

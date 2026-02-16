@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\ApiResource;
+namespace App\User\Infrastructure\ApiPlatform\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
-use App\State\Processor\DeleteProfileProcessor;
-use App\State\Processor\UpdateProfileProcessor;
-use App\State\Provider\ProfileProvider;
+use App\User\Domain\Entity\User;
+use App\User\Infrastructure\ApiPlatform\State\Processor\DeleteProfileProcessor;
+use App\User\Infrastructure\ApiPlatform\State\Processor\UpdateProfileProcessor;
+use App\User\Infrastructure\ApiPlatform\State\Provider\ProfileProvider;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
@@ -52,7 +53,7 @@ class UserProfile
 
     public string $createdAt = '';
 
-    public static function fromUser(\App\Entity\User $user): self
+    public static function fromUser(User $user): self
     {
         $dto = new self();
         $dto->id = (string) $user->getId();

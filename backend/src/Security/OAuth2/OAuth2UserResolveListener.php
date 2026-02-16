@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\OAuth2;
+namespace App\Security\OAuth2;
 
 use App\Security\SecurityUser;
 use App\Security\UserProvider;
