@@ -28,15 +28,13 @@ trait ApiTestHelper
 
     protected function getOAuth2Token(string $email, string $password): string
     {
-        $this->client->request('POST', '/api/auth/token', [], [], [
-            'CONTENT_TYPE' => 'application/x-www-form-urlencoded',
-        ], http_build_query([
+        $this->client->request('POST', '/api/auth/token', [
             'grant_type' => 'password',
             'client_id' => TestClientManagerSetup::CLIENT_ID,
             'client_secret' => TestClientManagerSetup::CLIENT_SECRET,
             'username' => $email,
             'password' => $password,
-        ]));
+        ]);
 
         $response = $this->client->getResponse();
         $data = json_decode($response->getContent(), true);

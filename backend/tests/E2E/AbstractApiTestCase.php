@@ -14,5 +14,6 @@ abstract class AbstractApiTestCase extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->client->disableReboot();
     }
 }
