@@ -31,11 +31,10 @@ class UpdateProfileProcessor implements ProcessorInterface
         /** @var SecurityUser $securityUser */
         $securityUser = $this->security->getUser();
 
-        $user = $this->profileService->update(
-            $securityUser->getUser(),
-            $data->firstName,
-            $data->lastName,
-        );
+        $user = $securityUser->getUser();
+        $this->mapper->toEntity($data, $user);
+
+        $user = $this->profileService->update($user);
 
         return $this->mapper->toDto($user, UserProfile::class);
     }

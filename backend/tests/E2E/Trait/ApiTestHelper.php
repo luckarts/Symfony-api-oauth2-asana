@@ -7,6 +7,7 @@ namespace App\Tests\E2E\Trait;
 use App\Auth\Infrastructure\OAuth2\TestClientManagerSetup;
 use App\User\Application\Service\UserRegistrationService;
 use App\User\Domain\Entity\User;
+use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,7 +24,13 @@ trait ApiTestHelper
         /** @var UserRegistrationService $registrationService */
         $registrationService = static::getContainer()->get(UserRegistrationService::class);
 
-        return $registrationService->register($email, $password, $firstName, $lastName);
+        $request = new RegisterUserRequest();
+        $request->email = $email;
+        $request->password = $password;
+        $request->firstName = $firstName;
+        $request->lastName = $lastName;
+
+        return $registrationService->register($request);
     }
 
     protected function getOAuth2Token(string $email, string $password): string

@@ -18,11 +18,8 @@ class UserProfileService
     ) {
     }
 
-    public function update(User $user, string $firstName, string $lastName): User
+    public function update(User $user): User
     {
-        $user->setFirstName($firstName);
-        $user->setLastName($lastName);
-
         $this->userRepository->save($user);
 
         $this->eventDispatcher->dispatch(new UserProfileUpdatedEvent(

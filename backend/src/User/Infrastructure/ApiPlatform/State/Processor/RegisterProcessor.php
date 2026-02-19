@@ -29,12 +29,7 @@ class RegisterProcessor implements ProcessorInterface
         assert($data instanceof RegisterUserRequest);
 
         try {
-            $user = $this->registrationService->register(
-                $data->email,
-                $data->password,
-                $data->firstName,
-                $data->lastName,
-            );
+            $user = $this->registrationService->register($data);
         } catch (UserAlreadyExistsException $e) {
             throw new UnprocessableEntityHttpException($e->getMessage(), $e);
         }

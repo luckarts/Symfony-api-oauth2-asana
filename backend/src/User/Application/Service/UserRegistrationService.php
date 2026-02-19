@@ -7,9 +7,9 @@ namespace App\User\Application\Service;
 use App\User\Domain\Contract\PasswordHasherInterface;
 use App\User\Domain\Contract\UserRepositoryInterface;
 use App\User\Domain\Entity\User;
-use App\User\Domain\Enum\Role;
 use App\User\Domain\Event\UserRegisteredEvent;
 use App\User\Domain\Exception\UserAlreadyExistsException;
+use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class UserRegistrationService
@@ -21,18 +21,18 @@ class UserRegistrationService
     ) {
     }
 
-    public function register(string $email, string $plainPassword, string $firstName, string $lastName): User
+    public function register(RegisterUserRequest $request): User
     {
-        if ($this->userRepository->existsByEmail($email)) {
-            throw UserAlreadyExistsException::withEmail($email);
+        if ($this->userRepository->existsByEmail($request->email)) {
+            throw UserAlreadyExistsException::withEmail($request->email);
         }
 
-        $user = new User();
-        $user->setEmail($email);
-        $user->setFirstName($firstName);
-        $user->setLastName($lastName);
-        $user->setRoles([Role::ROLE_USER]);
-        $user->setPassword($this->passwordHasher->hash($plainPassword));
+        $user = User::register(
+            email: $request->email,
+            hashedPassword: $this->passwordHasher->hash($request->password),
+            firstName: $request->firstName,
+            lastName: $request->lastName,
+        );
 
         $this->userRepository->save($user);
 
