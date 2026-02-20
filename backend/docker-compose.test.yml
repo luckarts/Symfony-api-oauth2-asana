@@ -6,11 +6,11 @@ services:
     volumes:
       - .:/app
     depends_on:
-      mysql:
+      database:
         condition: service_healthy
     environment:
       APP_ENV: test
-      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/app?serverVersion=8.0&charset=utf8mb4"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=16&charset=utf8"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?auto_setup=0"
       MAILER_DSN: "null://null"
       OAUTH_PRIVATE_KEY: /app/var/oauth/private.pem
@@ -19,17 +19,16 @@ services:
       OAUTH_ENCRYPTION_KEY: ${OAUTH_ENCRYPTION_KEY:-test_encryption_key_32_chars_long}
     working_dir: /app
 
-  mysql:
-    image: mysql:8.0
+  database:
+    image: postgres:16-alpine
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "3308:3306"
+      - "5433:5432"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 10

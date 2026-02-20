@@ -7,9 +7,9 @@ PHP_RUN = $(DOCKER_COMPOSE) run --rm php
 test-build:
 	$(DOCKER_COMPOSE) build
 
-## Démarre MySQL (attente healthcheck)
+## Démarre PostgreSQL (attente healthcheck)
 test-up:
-	$(DOCKER_COMPOSE) up -d mysql
+	$(DOCKER_COMPOSE) up -d database
 
 ## Installe les dépendances Composer
 test-install:

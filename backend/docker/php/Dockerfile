@@ -9,11 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libyaml-dev \
     libonig-dev \
     libxslt1-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
 RUN docker-php-ext-install \
-    pdo_mysql \
+    pdo_pgsql \
+    pgsql \
     intl \
     zip \
     mbstring \
