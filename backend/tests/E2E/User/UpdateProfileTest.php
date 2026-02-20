@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Tests\E2E\User;
 
 use App\Tests\E2E\AbstractApiTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateProfileTest extends AbstractApiTestCase
 {
     #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('user')]
     public function update_profile_success(): void
     {
         $this->createUser('update@example.com', 'password123', 'John', 'Doe');
@@ -30,6 +34,8 @@ class UpdateProfileTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function update_profile_unauthenticated(): void
     {
         $response = $this->apiRequest('PUT', '/api/user/profile', data: [
@@ -41,6 +47,8 @@ class UpdateProfileTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function update_profile_blank_fields(): void
     {
         $this->createUser('blank@example.com', 'password123', 'John', 'Doe');

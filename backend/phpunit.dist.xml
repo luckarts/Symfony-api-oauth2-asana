@@ -56,9 +56,6 @@
         <testsuite name="E2E">
             <directory>tests/E2E</directory>
         </testsuite>
-        <testsuite name="all">
-            <directory>tests</directory>
-        </testsuite>
     </testsuites>
 
     <source ignoreSuppressionOfDeprecations="true"

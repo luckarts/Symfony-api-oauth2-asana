@@ -13,6 +13,10 @@ services:
       DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/app?serverVersion=8.0&charset=utf8mb4"
       MESSENGER_TRANSPORT_DSN: "doctrine://default?auto_setup=0"
       MAILER_DSN: "null://null"
+      OAUTH_PRIVATE_KEY: /app/var/oauth/private.pem
+      OAUTH_PUBLIC_KEY: /app/var/oauth/public.pem
+      OAUTH_PASSPHRASE: ""
+      OAUTH_ENCRYPTION_KEY: ${OAUTH_ENCRYPTION_KEY:-test_encryption_key_32_chars_long}
     working_dir: /app
 
   mysql:

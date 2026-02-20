@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Tests\E2E\User;
 
 use App\Tests\E2E\AbstractApiTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpFoundation\Response;
 
 class RegisterTest extends AbstractApiTestCase
 {
     #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('user')]
     public function register_success(): void
     {
         $response = $this->apiRequest('POST', '/api/register', data: [
@@ -32,6 +36,8 @@ class RegisterTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function register_duplicate_email(): void
     {
         $this->createUser('duplicate@example.com', 'password123', 'First', 'User');
@@ -47,6 +53,8 @@ class RegisterTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function register_invalid_email(): void
     {
         $response = $this->apiRequest('POST', '/api/register', data: [
@@ -60,6 +68,8 @@ class RegisterTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function register_short_password(): void
     {
         $response = $this->apiRequest('POST', '/api/register', data: [
@@ -73,6 +83,8 @@ class RegisterTest extends AbstractApiTestCase
     }
 
     #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
     public function register_missing_fields(): void
     {
         $response = $this->apiRequest('POST', '/api/register', data: []);
