@@ -1,0 +1,15 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\User\:
+        resource: '../'
+        exclude:
+            - '../Domain/Entity/'
+
+    App\User\Domain\Contract\UserRepositoryInterface:
+        alias: App\User\Infrastructure\Doctrine\DoctrineUserRepository
+
+    App\User\Domain\Contract\PasswordHasherInterface:
+        alias: App\User\Infrastructure\Security\SymfonyPasswordHasher

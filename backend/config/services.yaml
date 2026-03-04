@@ -5,46 +5,14 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
+imports:
+    - { resource: '../src/Shared/config/services.yaml' }
+    - { resource: '../src/Security/config/services.yaml' }
+    - { resource: '../src/Auth/config/services.yaml' }
+    - { resource: '../src/User/config/services.yaml' }
+    - { resource: '../src/Task/config/services.yaml' }
+
 services:
-    # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-
-    # --- Shared ---
-    App\Shared\:
-        resource: '../src/Shared/'
-
-    # --- Security (cross-domain) ---
-    App\Security\:
-        resource: '../src/Security/'
-
-    # --- User Bounded Context ---
-    App\User\:
-        resource: '../src/User/'
-        exclude:
-            - '../src/User/Domain/Entity/'
-
-    # --- Mapping infrastructure ---
-    # --- Task Bounded Context ---
-    App\Task\:
-        resource: '../src/Task/'
-        exclude:
-            - '../src/Task/Domain/Entity/'
-            - '../src/Task/config/'
-
-    App\Shared\Infrastructure\Mapper\MappingConfigLoader:
-        arguments:
-            $configDirs:
-                - '%kernel.project_dir%/src/User/Infrastructure/ApiPlatform/Config'
-                - '%kernel.project_dir%/src/Task/Infrastructure/ApiPlatform/Config'
-
-    # --- Contract bindings (interface → implementation) ---
-    App\User\Domain\Contract\UserRepositoryInterface:
-        alias: App\User\Infrastructure\Doctrine\DoctrineUserRepository
-
-    App\User\Domain\Contract\PasswordHasherInterface:
-        alias: App\User\Infrastructure\Security\SymfonyPasswordHasher
-
-    App\Task\Domain\Contract\TaskRepositoryInterface:
-        alias: App\Task\Infrastructure\Doctrine\ORM\TaskRepository
+        autowire: true
+        autoconfigure: true
