@@ -26,10 +26,18 @@ services:
             - '../src/User/Domain/Entity/'
 
     # --- Mapping infrastructure ---
+    # --- Task Bounded Context ---
+    App\Task\:
+        resource: '../src/Task/'
+        exclude:
+            - '../src/Task/Domain/Entity/'
+            - '../src/Task/config/'
+
     App\Shared\Infrastructure\Mapper\MappingConfigLoader:
         arguments:
             $configDirs:
                 - '%kernel.project_dir%/src/User/Infrastructure/ApiPlatform/Config'
+                - '%kernel.project_dir%/src/Task/Infrastructure/ApiPlatform/Config'
 
     # --- Contract bindings (interface → implementation) ---
     App\User\Domain\Contract\UserRepositoryInterface:
@@ -37,3 +45,6 @@ services:
 
     App\User\Domain\Contract\PasswordHasherInterface:
         alias: App\User\Infrastructure\Security\SymfonyPasswordHasher
+
+    App\Task\Domain\Contract\TaskRepositoryInterface:
+        alias: App\Task\Infrastructure\Doctrine\ORM\TaskRepository
