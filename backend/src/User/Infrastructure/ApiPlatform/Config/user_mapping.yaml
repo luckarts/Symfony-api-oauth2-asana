@@ -1,0 +1,65 @@
+entity: App\User\Domain\Entity\User
+
+resources:
+    user_profile:
+        class: App\User\Infrastructure\ApiPlatform\Resource\UserProfile
+        fields:
+            id:
+                type: string
+                operations: [read]
+            email:
+                type: string
+                operations: [read]
+            firstName:
+                type: string
+                operations: [read, write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Length: { max: 100 }
+            lastName:
+                type: string
+                operations: [read, write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Length: { max: 100 }
+            roles:
+                type: array
+                operations: [read]
+            createdAt:
+                type: string
+                operations: [read]
+                transform: "datetime:ATOM"
+
+    register_user:
+        class: App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest
+        fields:
+            email:
+                type: string
+                operations: [write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Email: ~
+            password:
+                type: string
+                operations: [write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Length: { min: 8 }
+            firstName:
+                type: string
+                operations: [write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Length: { max: 100 }
+            lastName:
+                type: string
+                operations: [write]
+                validation:
+                    write:
+                        - NotBlank: ~
+                        - Length: { max: 100 }

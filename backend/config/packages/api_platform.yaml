@@ -3,4 +3,5 @@ api_platform:
         stateless: true
 
     mapping:
-        paths: []
+        paths:
+            - '%kernel.project_dir%/src/User/Infrastructure/ApiPlatform/Resource'
