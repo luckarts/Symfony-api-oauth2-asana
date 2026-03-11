@@ -8,9 +8,11 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Project\Infrastructure\ApiPlatform\State\Processor\CreateProjectProcessor;
+use App\Project\Infrastructure\ApiPlatform\State\Processor\DeleteProjectProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Processor\UpdateProjectProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectCollectionProvider;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectItemProvider;
@@ -40,6 +42,13 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriVariables: ['id' => new Link(fromClass: ProjectResource::class, identifiers: ['id'])],
             read: false,
             processor: UpdateProjectProcessor::class,
+            security: "is_granted('ROLE_USER')",
+        ),
+        new Delete(
+            uriTemplate: '/projects/{id}',
+            uriVariables: ['id' => new Link(fromClass: ProjectResource::class, identifiers: ['id'])],
+            read: false,
+            processor: DeleteProjectProcessor::class,
             security: "is_granted('ROLE_USER')",
         ),
     ],
