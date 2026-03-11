@@ -47,6 +47,42 @@ final class BoardColumnService
         $column->setIsDefault(true);
     }
 
+    /**
+     * @param list<string> $columnIds
+     *
+     * @return list<BoardColumn>
+     */
+    public function reorder(string $projectId, array $columnIds): array
+    {
+        $columns = $this->boardColumnRepository->findByProject($projectId);
+
+        if (count($columnIds) !== count($columns)) {
+            throw new UnprocessableEntityHttpException('The order list must contain all columns of the project.');
+        }
+
+        /** @var array<string, BoardColumn> $columnMap */
+        $columnMap = [];
+        foreach ($columns as $column) {
+            $columnMap[(string) $column->getId()] = $column;
+        }
+
+        /** @var list<BoardColumn> $ordered */
+        $ordered = [];
+        foreach ($columnIds as $position => $id) {
+            $column = $columnMap[$id] ?? null;
+            if (null === $column) {
+                throw new UnprocessableEntityHttpException(sprintf('Column "%s" does not belong to this project.', $id));
+            }
+            unset($columnMap[$id]);
+            $column->setPosition($position);
+            $ordered[] = $column;
+        }
+
+        $this->boardColumnRepository->saveAll($ordered);
+
+        return $ordered;
+    }
+
     public function guardNotLastColumn(string $projectId): void
     {
         $columns = $this->boardColumnRepository->findByProject($projectId);

@@ -18,5 +18,8 @@ interface BoardColumnRepositoryInterface
 
     public function save(BoardColumn $column): void;
 
+    /** @param list<BoardColumn> $columns */
+    public function saveAll(array $columns): void;
+
     public function remove(BoardColumn $column): void;
 }

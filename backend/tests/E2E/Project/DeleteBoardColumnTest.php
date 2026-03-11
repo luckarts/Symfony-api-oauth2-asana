@@ -62,12 +62,10 @@ class DeleteBoardColumnTest extends AbstractApiTestCase
             true,
         );
 
-        $list = json_decode(
-            $this->apiRequest('GET', '/api/projects/'.$project['id'].'/columns', $token)->getContent(),
+        $onlyCol = json_decode(
+            $this->apiRequest('POST', '/api/projects/'.$project['id'].'/columns', $token, ['title' => 'Only Column'])->getContent(),
             true,
         );
-
-        $onlyCol = $list['member'][0];
 
         $response = $this->apiRequest('DELETE', '/api/projects/'.$project['id'].'/columns/'.$onlyCol['id'], $token);
 

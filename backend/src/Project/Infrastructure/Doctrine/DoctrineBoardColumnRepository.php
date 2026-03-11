@@ -48,6 +48,15 @@ class DoctrineBoardColumnRepository extends ServiceEntityRepository implements B
         $this->getEntityManager()->flush();
     }
 
+    /** @param list<BoardColumn> $columns */
+    public function saveAll(array $columns): void
+    {
+        foreach ($columns as $column) {
+            $this->getEntityManager()->persist($column);
+        }
+        $this->getEntityManager()->flush();
+    }
+
     public function remove(BoardColumn $column): void
     {
         $this->getEntityManager()->remove($column);
