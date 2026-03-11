@@ -6,3 +6,4 @@ api_platform:
         paths:
             - '%kernel.project_dir%/src/User/Infrastructure/ApiPlatform/Resource'
             - '%kernel.project_dir%/src/Task/Infrastructure/ApiPlatform/Resource'
+            - '%kernel.project_dir%/src/Project/Infrastructure/ApiPlatform/Resource'

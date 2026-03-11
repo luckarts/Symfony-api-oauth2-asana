@@ -8,9 +8,6 @@ resources:
                 operations: [read]
             title:
                 operations: [read, write]
-                constraints:
-                    - NotBlank: ~
-                    - Length: { max: 255 }
             status:
                 operations: [read, write]
             createdAt:

@@ -1,0 +1,19 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Project\:
+        resource: '../'
+        exclude:
+            - '../Domain/Entity/'
+            - '../config/'
+
+    App\Project\Domain\Contract\ProjectRepositoryInterface:
+        alias: App\Project\Infrastructure\Doctrine\DoctrineProjectRepository
+
+    App\Project\Domain\Contract\ProjectMemberRepositoryInterface:
+        alias: App\Project\Infrastructure\Doctrine\DoctrineProjectMemberRepository
+
+    App\Project\Domain\Contract\BoardColumnRepositoryInterface:
+        alias: App\Project\Infrastructure\Doctrine\DoctrineBoardColumnRepository
