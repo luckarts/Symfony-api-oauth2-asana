@@ -49,13 +49,17 @@ trait ApiTestHelper
         return $data['access_token'];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     protected function apiRequest(
         string $method,
         string $uri,
         ?string $token = null,
         array $data = [],
+        string $contentType = 'application/ld+json',
     ): Response {
-        $headers = ['CONTENT_TYPE' => 'application/ld+json'];
+        $headers = ['CONTENT_TYPE' => $contentType];
 
         if ($token !== null) {
             $headers['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
