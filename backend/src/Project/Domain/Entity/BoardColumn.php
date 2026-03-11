@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Entity;
 
-use App\Project\Domain\Enum\ProjectStatus;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'projects')]
+#[ORM\Table(name: 'board_columns')]
 #[ORM\HasLifecycleCallbacks]
-class Project
+class BoardColumn
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
@@ -19,17 +18,21 @@ class Project
     #[ORM\CustomIdGenerator(class: \Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator::class)]
     private ?string $id = null;
 
-    #[ORM\Column(type: 'string', length: 36)]
-    private string $userId;
+    #[ORM\ManyToOne(targetEntity: Project::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Project $project;
 
-    #[ORM\Column(type: 'string', length: 150)]
-    private string $name;
+    #[ORM\Column(type: 'string', length: 100)]
+    private string $title;
 
-    #[ORM\Column(enumType: ProjectStatus::class)]
-    private ProjectStatus $status = ProjectStatus::ACTIVE;
+    #[ORM\Column(type: 'integer')]
+    private int $position = 0;
 
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $description = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $wipLimit = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isDefault = false;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
@@ -37,10 +40,11 @@ class Project
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
-    public function __construct(string $name, string $userId)
+    public function __construct(Project $project, string $title, int $position = 0)
     {
-        $this->name = $name;
-        $this->userId = $userId;
+        $this->project = $project;
+        $this->title = $title;
+        $this->position = $position;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -50,43 +54,55 @@ class Project
         return $this->id;
     }
 
-    public function getUserId(): string
+    public function getProject(): Project
     {
-        return $this->userId;
+        return $this->project;
     }
 
-    public function getName(): string
+    public function getTitle(): string
     {
-        return $this->name;
+        return $this->title;
     }
 
-    public function setName(string $name): self
+    public function setTitle(string $title): self
     {
-        $this->name = $name;
+        $this->title = $title;
 
         return $this;
     }
 
-    public function getStatus(): ProjectStatus
+    public function getPosition(): int
     {
-        return $this->status;
+        return $this->position;
     }
 
-    public function setStatus(ProjectStatus $status): self
+    public function setPosition(int $position): self
     {
-        $this->status = $status;
+        $this->position = $position;
 
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getWipLimit(): ?int
     {
-        return $this->description;
+        return $this->wipLimit;
     }
 
-    public function setDescription(?string $description): self
+    public function setWipLimit(?int $wipLimit): self
     {
-        $this->description = $description;
+        $this->wipLimit = $wipLimit;
+
+        return $this;
+    }
+
+    public function isDefault(): bool
+    {
+        return $this->isDefault;
+    }
+
+    public function setIsDefault(bool $isDefault): self
+    {
+        $this->isDefault = $isDefault;
 
         return $this;
     }
