@@ -19,6 +19,11 @@ class DoctrineBoardColumnRepository extends ServiceEntityRepository implements B
         parent::__construct($registry, BoardColumn::class);
     }
 
+    public function findById(string $id): ?BoardColumn
+    {
+        return $this->find($id);
+    }
+
     /** @return list<BoardColumn> */
     public function findByProject(string $projectId): array
     {

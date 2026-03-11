@@ -8,6 +8,8 @@ use App\Project\Domain\Entity\BoardColumn;
 
 interface BoardColumnRepositoryInterface
 {
+    public function findById(string $id): ?BoardColumn;
+
     /** @return list<BoardColumn> */
     public function findByProject(string $projectId): array;
 
