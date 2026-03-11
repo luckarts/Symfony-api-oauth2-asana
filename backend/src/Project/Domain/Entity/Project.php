@@ -19,6 +19,9 @@ class Project
     #[ORM\CustomIdGenerator(class: \Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator::class)]
     private ?string $id = null;
 
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $userId;
+
     #[ORM\Column(type: 'string', length: 150)]
     private string $name;
 
@@ -34,9 +37,10 @@ class Project
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
-    public function __construct(string $name)
+    public function __construct(string $name, string $userId)
     {
         $this->name = $name;
+        $this->userId = $userId;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -44,6 +48,11 @@ class Project
     public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function getUserId(): string
+    {
+        return $this->userId;
     }
 
     public function getName(): string
