@@ -1,0 +1,13 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Task\:
+        resource: '../'
+        exclude:
+            - '../Domain/Entity/'
+            - '../config/'
+
+    App\Task\Domain\Contract\TaskRepositoryInterface:
+        alias: App\Task\Infrastructure\Doctrine\ORM\TaskRepository

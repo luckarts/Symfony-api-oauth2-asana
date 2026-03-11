@@ -1,0 +1,20 @@
+entity: App\Task\Domain\Entity\Task
+
+resources:
+    task:
+        class: App\Task\Infrastructure\ApiPlatform\Resource\TaskResource
+        fields:
+            id:
+                operations: [read]
+            title:
+                operations: [read, write]
+                constraints:
+                    - NotBlank: ~
+                    - Length: { max: 255 }
+            status:
+                operations: [read, write]
+            createdAt:
+                operations: [read]
+                transform:
+                    type: datetime
+                    format: !php/const DateTimeInterface::ATOM
