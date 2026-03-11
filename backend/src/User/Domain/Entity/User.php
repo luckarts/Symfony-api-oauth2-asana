@@ -18,7 +18,7 @@ class User
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\CustomIdGenerator(class: \Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator::class)]
     private ?string $id = null;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
