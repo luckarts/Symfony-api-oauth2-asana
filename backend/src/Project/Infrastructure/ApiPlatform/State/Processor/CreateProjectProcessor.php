@@ -10,6 +10,7 @@ use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Domain\Entity\Project;
 use App\Project\Domain\Enum\ProjectStatus;
 use App\Project\Infrastructure\ApiPlatform\Resource\ProjectResource;
+use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectCollectionProvider;
 
 /**
  * @implements ProcessorInterface<ProjectResource, ProjectResource>
@@ -38,14 +39,6 @@ class CreateProjectProcessor implements ProcessorInterface
 
         $this->projectRepository->save($project);
 
-        $resource = new ProjectResource();
-        $resource->id = (string) $project->getId();
-        $resource->name = $project->getName();
-        $resource->status = $project->getStatus()->value;
-        $resource->description = $project->getDescription();
-        $resource->createdAt = $project->getCreatedAt()->format(\DateTimeInterface::ATOM);
-        $resource->updatedAt = $project->getUpdatedAt()->format(\DateTimeInterface::ATOM);
-
-        return $resource;
+        return ProjectCollectionProvider::toResource($project);
     }
 }
