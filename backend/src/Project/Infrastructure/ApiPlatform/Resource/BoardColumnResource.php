@@ -7,10 +7,14 @@ namespace App\Project\Infrastructure\ApiPlatform\Resource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Project\Domain\Entity\BoardColumn;
 use App\Project\Domain\Entity\Project;
 use App\Project\Infrastructure\ApiPlatform\State\Processor\CreateBoardColumnProcessor;
+use App\Project\Infrastructure\ApiPlatform\State\Processor\UpdateBoardColumnProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\BoardColumnCollectionProvider;
+use App\Project\Infrastructure\ApiPlatform\State\Provider\BoardColumnItemProvider;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
@@ -30,6 +34,16 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'id' => new Link(fromClass: Project::class, identifiers: ['id']),
             ],
             processor: CreateBoardColumnProcessor::class,
+            security: "is_granted('ROLE_USER')",
+        ),
+        new Patch(
+            uriTemplate: '/projects/{id}/columns/{colId}',
+            uriVariables: [
+                'id' => new Link(fromClass: Project::class, identifiers: ['id']),
+                'colId' => new Link(fromClass: BoardColumn::class, identifiers: ['id']),
+            ],
+            provider: BoardColumnItemProvider::class,
+            processor: UpdateBoardColumnProcessor::class,
             security: "is_granted('ROLE_USER')",
         ),
     ],
