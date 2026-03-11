@@ -11,6 +11,7 @@ imports:
     - { resource: '../src/Auth/config/services.yaml' }
     - { resource: '../src/User/config/services.yaml' }
     - { resource: '../src/Task/config/services.yaml' }
+    - { resource: '../src/Project/config/services.yaml' }
 
 services:
     _defaults:

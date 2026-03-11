@@ -33,6 +33,13 @@ doctrine:
                 prefix: App\Task\Domain\Entity
                 alias: Task
 
+            Project:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Project/Domain/Entity'
+                prefix: App\Project\Domain\Entity
+                alias: Project
+
 when@test:
     doctrine:
         dbal:
