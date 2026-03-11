@@ -7,7 +7,9 @@ namespace App\Project\Infrastructure\ApiPlatform\Resource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
 use App\Project\Domain\Entity\Project;
+use App\Project\Infrastructure\ApiPlatform\State\Processor\CreateBoardColumnProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\BoardColumnCollectionProvider;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -20,6 +22,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'id' => new Link(fromClass: Project::class, identifiers: ['id']),
             ],
             provider: BoardColumnCollectionProvider::class,
+            security: "is_granted('ROLE_USER')",
+        ),
+        new Post(
+            uriTemplate: '/projects/{id}/columns',
+            uriVariables: [
+                'id' => new Link(fromClass: Project::class, identifiers: ['id']),
+            ],
+            processor: CreateBoardColumnProcessor::class,
             security: "is_granted('ROLE_USER')",
         ),
     ],

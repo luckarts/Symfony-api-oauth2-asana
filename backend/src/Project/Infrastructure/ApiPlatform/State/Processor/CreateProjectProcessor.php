@@ -11,7 +11,7 @@ use App\Project\Domain\Entity\Project;
 use App\Project\Domain\Enum\ProjectStatus;
 use App\Project\Infrastructure\ApiPlatform\Resource\ProjectResource;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectCollectionProvider;
-use App\User\Domain\Entity\User;
+use App\Security\SecurityUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -30,12 +30,12 @@ class CreateProjectProcessor implements ProcessorInterface
     {
         assert($data instanceof ProjectResource);
 
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
+        $securityUser = $this->security->getUser();
+        if (!$securityUser instanceof SecurityUser) {
             throw new AccessDeniedHttpException();
         }
 
-        $project = new Project($data->name, (string) $user->getId());
+        $project = new Project($data->name, (string) $securityUser->getUser()->getId());
 
         if ('' !== $data->status) {
             $status = ProjectStatus::tryFrom($data->status);
