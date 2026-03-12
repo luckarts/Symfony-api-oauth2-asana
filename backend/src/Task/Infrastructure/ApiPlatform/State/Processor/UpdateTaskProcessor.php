@@ -6,6 +6,7 @@ namespace App\Task\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
 use App\Task\Domain\Enum\TaskStatus;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
@@ -23,6 +24,7 @@ class UpdateTaskProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly TaskRepositoryInterface $taskRepository,
+        private readonly BoardColumnRepositoryInterface $columnRepository,
         private readonly Security $security,
     ) {
     }
@@ -51,6 +53,16 @@ class UpdateTaskProcessor implements ProcessorInterface
         $status = TaskStatus::tryFrom($data->status);
         if (null !== $status) {
             $task->setStatus($status);
+        }
+
+        if (null !== $data->columnId) {
+            $column = $this->columnRepository->findById($data->columnId);
+            if (null === $column || (string) $column->getProject()->getId() !== $projectId) {
+                throw new UnprocessableEntityHttpException('columnId does not belong to this project');
+            }
+            $task->setColumn($column);
+        } else {
+            $task->setColumn(null);
         }
 
         $task->setOrderIndex($data->orderIndex);
