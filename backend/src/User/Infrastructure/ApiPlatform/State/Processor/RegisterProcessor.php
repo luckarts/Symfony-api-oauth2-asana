@@ -6,11 +6,11 @@ namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use App\Shared\Infrastructure\Mapper\EntityDtoMapper;
 use App\User\Application\Service\UserRegistrationService;
 use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
 use App\User\Infrastructure\ApiPlatform\Resource\UserProfile;
+use App\User\Infrastructure\ApiPlatform\Transformer\UserProfileTransformer;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -20,7 +20,7 @@ class RegisterProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly UserRegistrationService $registrationService,
-        private readonly EntityDtoMapper $mapper,
+        private readonly UserProfileTransformer $transformer,
     ) {
     }
 
@@ -34,6 +34,6 @@ class RegisterProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException($e->getMessage(), $e);
         }
 
-        return $this->mapper->toDto($user, UserProfile::class);
+        return $this->transformer->toResource($user);
     }
 }
