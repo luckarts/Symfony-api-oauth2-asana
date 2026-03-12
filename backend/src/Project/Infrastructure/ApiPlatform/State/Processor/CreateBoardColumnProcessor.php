@@ -11,7 +11,7 @@ use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Domain\Entity\BoardColumn;
 use App\Project\Infrastructure\ApiPlatform\Resource\BoardColumnResource;
-use App\Project\Infrastructure\ApiPlatform\State\Provider\BoardColumnCollectionProvider;
+use App\Project\Infrastructure\ApiPlatform\Transformer\BoardColumnResourceTransformer;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -26,6 +26,7 @@ class CreateBoardColumnProcessor implements ProcessorInterface
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnRepositoryInterface $boardColumnRepository,
         private readonly BoardColumnService $boardColumnService,
+        private readonly BoardColumnResourceTransformer $boardColumnResourceTransformer,
         private readonly Security $security,
     ) {
     }
@@ -58,6 +59,6 @@ class CreateBoardColumnProcessor implements ProcessorInterface
 
         $this->boardColumnRepository->save($column);
 
-        return BoardColumnCollectionProvider::toResource($column);
+        return $this->boardColumnResourceTransformer->toResource($column);
     }
 }

@@ -8,8 +8,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
-use App\Project\Domain\Entity\BoardColumn;
 use App\Project\Infrastructure\ApiPlatform\Resource\BoardColumnResource;
+use App\Project\Infrastructure\ApiPlatform\Transformer\BoardColumnResourceTransformer;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -23,6 +23,7 @@ class BoardColumnCollectionProvider implements ProviderInterface
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnRepositoryInterface $boardColumnRepository,
+        private readonly BoardColumnResourceTransformer $transformer,
         private readonly Security $security,
     ) {
     }
@@ -43,21 +44,11 @@ class BoardColumnCollectionProvider implements ProviderInterface
 
         $columns = $this->boardColumnRepository->findByProjectOrdered($projectId);
 
-        return array_map(static fn (BoardColumn $col) => self::toResource($col), $columns);
-    }
+        $resources = [];
+        foreach ($columns as $column) {
+            $resources[] = $this->transformer->toResource($column);
+        }
 
-    public static function toResource(BoardColumn $column): BoardColumnResource
-    {
-        $resource = new BoardColumnResource();
-        $resource->id = (string) $column->getId();
-        $resource->title = $column->getTitle();
-        $resource->position = $column->getPosition();
-        $resource->wipLimit = $column->getWipLimit();
-        $resource->isDefault = $column->isDefault();
-        $resource->projectId = (string) $column->getProject()->getId();
-        $resource->createdAt = $column->getCreatedAt()->format(\DateTimeInterface::ATOM);
-        $resource->updatedAt = $column->getUpdatedAt()->format(\DateTimeInterface::ATOM);
-
-        return $resource;
+        return $resources;
     }
 }
