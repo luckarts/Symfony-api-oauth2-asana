@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Infrastructure\ApiPlatform\Resource\ProjectResource;
+use App\Project\Infrastructure\ApiPlatform\Transformer\ProjectResourceTransformer;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -17,6 +18,7 @@ class ProjectItemProvider implements ProviderInterface
 {
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
+        private readonly ProjectResourceTransformer $transformer,
     ) {
     }
 
@@ -29,6 +31,6 @@ class ProjectItemProvider implements ProviderInterface
             throw new NotFoundHttpException('Project not found.');
         }
 
-        return ProjectCollectionProvider::toResource($project);
+        return $this->transformer->toResource($project);
     }
 }

@@ -8,10 +8,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Project\Application\Service\BoardColumnService;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
-use App\Project\Domain\Entity\BoardColumn;
 use App\Project\Infrastructure\ApiPlatform\Resource\BoardColumnResource;
 use App\Project\Infrastructure\ApiPlatform\Resource\BoardColumnsReorderResource;
-use App\Project\Infrastructure\ApiPlatform\State\Provider\BoardColumnCollectionProvider;
+use App\Project\Infrastructure\ApiPlatform\Transformer\BoardColumnResourceTransformer;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -25,6 +24,7 @@ class ReorderBoardColumnsProcessor implements ProcessorInterface
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnService $boardColumnService,
+        private readonly BoardColumnResourceTransformer $transformer,
         private readonly Security $security,
     ) {
     }
@@ -49,9 +49,11 @@ class ReorderBoardColumnsProcessor implements ProcessorInterface
 
         $columns = $this->boardColumnService->reorder($projectId, $data->order);
 
-        return array_map(
-            static fn (BoardColumn $col) => BoardColumnCollectionProvider::toResource($col),
-            $columns,
-        );
+        $resources = [];
+        foreach ($columns as $column) {
+            $resources[] = $this->transformer->toResource($column);
+        }
+
+        return $resources;
     }
 }

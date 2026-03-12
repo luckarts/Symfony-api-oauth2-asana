@@ -9,6 +9,7 @@ use ApiPlatform\State\ProviderInterface;
 use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Infrastructure\ApiPlatform\Resource\BoardColumnResource;
+use App\Project\Infrastructure\ApiPlatform\Transformer\BoardColumnResourceTransformer;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -22,6 +23,7 @@ class BoardColumnItemProvider implements ProviderInterface
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnRepositoryInterface $boardColumnRepository,
+        private readonly BoardColumnResourceTransformer $transformer,
         private readonly Security $security,
     ) {
     }
@@ -47,6 +49,6 @@ class BoardColumnItemProvider implements ProviderInterface
             throw new NotFoundHttpException('Board column not found.');
         }
 
-        return BoardColumnCollectionProvider::toResource($column);
+        return $this->transformer->toResource($column);
     }
 }

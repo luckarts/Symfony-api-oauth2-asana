@@ -10,7 +10,7 @@ use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
 use App\Task\Domain\Enum\TaskStatus;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
-use App\Task\Infrastructure\ApiPlatform\State\Provider\TaskCollectionProvider;
+use App\Task\Infrastructure\ApiPlatform\Transformer\TaskResourceTransformer;
 use App\Task\Infrastructure\Security\TaskVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -26,6 +26,7 @@ class UpdateTaskProcessor implements ProcessorInterface
         private readonly TaskRepositoryInterface $taskRepository,
         private readonly BoardColumnRepositoryInterface $columnRepository,
         private readonly Security $security,
+        private readonly TaskResourceTransformer $transformer,
     ) {
     }
 
@@ -80,6 +81,6 @@ class UpdateTaskProcessor implements ProcessorInterface
 
         $this->taskRepository->save($task);
 
-        return TaskCollectionProvider::toResource($task);
+        return $this->transformer->toResource($task);
     }
 }

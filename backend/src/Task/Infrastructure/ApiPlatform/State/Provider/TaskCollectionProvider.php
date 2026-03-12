@@ -9,8 +9,8 @@ use ApiPlatform\State\ProviderInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
-use App\Task\Domain\Entity\Task;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
+use App\Task\Infrastructure\ApiPlatform\Transformer\TaskResourceTransformer;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -24,6 +24,7 @@ class TaskCollectionProvider implements ProviderInterface
         private readonly TaskRepositoryInterface $taskRepository,
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly Security $security,
+        private readonly TaskResourceTransformer $transformer,
     ) {
     }
 
@@ -43,22 +44,11 @@ class TaskCollectionProvider implements ProviderInterface
 
         $tasks = $this->taskRepository->findByProject($projectId);
 
-        return array_map(static fn (Task $t) => self::toResource($t), $tasks);
-    }
+        $resources = [];
+        foreach ($tasks as $task) {
+            $resources[] = $this->transformer->toResource($task);
+        }
 
-    public static function toResource(Task $task): TaskResource
-    {
-        $resource = new TaskResource();
-        $resource->id = (string) $task->getId();
-        $resource->projectId = (string) $task->getProject()->getId();
-        $resource->columnId = $task->getColumn()?->getId();
-        $resource->title = $task->getTitle();
-        $resource->status = $task->getStatus()->value;
-        $resource->isCompleted = $task->isCompleted();
-        $resource->dueDate = $task->getDueDate()?->format(\DateTimeInterface::ATOM);
-        $resource->orderIndex = $task->getOrderIndex();
-        $resource->createdAt = $task->getCreatedAt()->format(\DateTimeInterface::ATOM);
-
-        return $resource;
+        return $resources;
     }
 }

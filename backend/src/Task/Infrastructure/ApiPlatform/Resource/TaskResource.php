@@ -86,4 +86,6 @@ class TaskResource
     public int $orderIndex = 0;
 
     public string $createdAt = '';
+
+    public string $updatedAt = '';
 }
