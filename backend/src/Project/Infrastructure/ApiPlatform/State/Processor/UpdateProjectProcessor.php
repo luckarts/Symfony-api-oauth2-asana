@@ -9,7 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Domain\Enum\ProjectStatus;
 use App\Project\Infrastructure\ApiPlatform\Resource\ProjectResource;
-use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectCollectionProvider;
+use App\Project\Infrastructure\ApiPlatform\Transformer\ProjectResourceTransformer;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -19,6 +19,7 @@ class UpdateProjectProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
+        private readonly ProjectResourceTransformer $transformer,
     ) {
     }
 
@@ -48,6 +49,6 @@ class UpdateProjectProcessor implements ProcessorInterface
 
         $this->projectRepository->save($project);
 
-        return ProjectCollectionProvider::toResource($project);
+        return $this->transformer->toResource($project);
     }
 }

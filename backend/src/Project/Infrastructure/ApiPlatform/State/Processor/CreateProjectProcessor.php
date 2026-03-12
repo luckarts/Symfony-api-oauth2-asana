@@ -10,7 +10,7 @@ use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Domain\Entity\Project;
 use App\Project\Domain\Enum\ProjectStatus;
 use App\Project\Infrastructure\ApiPlatform\Resource\ProjectResource;
-use App\Project\Infrastructure\ApiPlatform\State\Provider\ProjectCollectionProvider;
+use App\Project\Infrastructure\ApiPlatform\Transformer\ProjectResourceTransformer;
 use App\Security\SecurityUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -22,6 +22,7 @@ class CreateProjectProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly ProjectRepositoryInterface $projectRepository,
+        private readonly ProjectResourceTransformer $transformer,
         private readonly Security $security,
     ) {
     }
@@ -48,6 +49,6 @@ class CreateProjectProcessor implements ProcessorInterface
 
         $this->projectRepository->save($project);
 
-        return ProjectCollectionProvider::toResource($project);
+        return $this->transformer->toResource($project);
     }
 }
