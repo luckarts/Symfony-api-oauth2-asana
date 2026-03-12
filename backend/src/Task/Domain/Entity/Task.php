@@ -19,11 +19,28 @@ class Task
     #[ORM\CustomIdGenerator(class: \Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator::class)]
     private ?string $id = null;
 
+    #[ORM\ManyToOne(targetEntity: \App\Project\Domain\Entity\Project::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private \App\Project\Domain\Entity\Project $project;
+
+    #[ORM\ManyToOne(targetEntity: \App\Project\Domain\Entity\BoardColumn::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?\App\Project\Domain\Entity\BoardColumn $column = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private string $title;
 
     #[ORM\Column(enumType: TaskStatus::class)]
     private TaskStatus $status = TaskStatus::TODO;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isCompleted = false;
+
+    #[ORM\Column(type: 'integer')]
+    private int $orderIndex = 0;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dueDate = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
@@ -31,9 +48,10 @@ class Task
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
 
-    public function __construct(string $title)
+    public function __construct(string $title, \App\Project\Domain\Entity\Project $project)
     {
         $this->title = $title;
+        $this->project = $project;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -41,6 +59,23 @@ class Task
     public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function getProject(): \App\Project\Domain\Entity\Project
+    {
+        return $this->project;
+    }
+
+    public function getColumn(): ?\App\Project\Domain\Entity\BoardColumn
+    {
+        return $this->column;
+    }
+
+    public function setColumn(?\App\Project\Domain\Entity\BoardColumn $column): self
+    {
+        $this->column = $column;
+
+        return $this;
     }
 
     public function getTitle(): string
@@ -63,6 +98,42 @@ class Task
     public function setStatus(TaskStatus $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->isCompleted;
+    }
+
+    public function setIsCompleted(bool $isCompleted): self
+    {
+        $this->isCompleted = $isCompleted;
+
+        return $this;
+    }
+
+    public function getOrderIndex(): int
+    {
+        return $this->orderIndex;
+    }
+
+    public function setOrderIndex(int $orderIndex): self
+    {
+        $this->orderIndex = $orderIndex;
+
+        return $this;
+    }
+
+    public function getDueDate(): ?\DateTimeImmutable
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate(?\DateTimeImmutable $dueDate): self
+    {
+        $this->dueDate = $dueDate;
 
         return $this;
     }

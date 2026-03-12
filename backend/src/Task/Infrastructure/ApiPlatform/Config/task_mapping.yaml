@@ -10,6 +10,16 @@ resources:
                 operations: [read, write]
             status:
                 operations: [read, write]
+            columnId:
+                operations: [read, write]
+            orderIndex:
+                operations: [read, write]
+            isCompleted:
+                operations: [read, write]
+            dueDate:
+                operations: [read, write]
+            projectId:
+                operations: [read]
             createdAt:
                 operations: [read]
                 transform:
