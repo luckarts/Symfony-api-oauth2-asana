@@ -25,3 +25,8 @@ resources:
                 transform:
                     type: datetime
                     format: !php/const DateTimeInterface::ATOM
+            updatedAt:
+                operations: [read]
+                transform:
+                    type: datetime
+                    format: !php/const DateTimeInterface::ATOM

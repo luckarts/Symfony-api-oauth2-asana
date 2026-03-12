@@ -12,7 +12,7 @@ use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
 use App\Task\Domain\Entity\Task;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
-use App\Task\Infrastructure\ApiPlatform\State\Provider\TaskCollectionProvider;
+use App\Task\Infrastructure\ApiPlatform\Transformer\TaskResourceTransformer;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -28,6 +28,7 @@ class CreateTaskProcessor implements ProcessorInterface
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnRepositoryInterface $columnRepository,
         private readonly Security $security,
+        private readonly TaskResourceTransformer $transformer,
     ) {
     }
 
@@ -60,6 +61,6 @@ class CreateTaskProcessor implements ProcessorInterface
 
         $this->taskRepository->save($task);
 
-        return TaskCollectionProvider::toResource($task);
+        return $this->transformer->toResource($task);
     }
 }

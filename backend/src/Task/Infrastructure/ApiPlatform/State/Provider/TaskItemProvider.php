@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
+use App\Task\Infrastructure\ApiPlatform\Transformer\TaskResourceTransformer;
 use App\Task\Infrastructure\Security\TaskVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -21,6 +22,7 @@ class TaskItemProvider implements ProviderInterface
     public function __construct(
         private readonly TaskRepositoryInterface $taskRepository,
         private readonly Security $security,
+        private readonly TaskResourceTransformer $transformer,
     ) {
     }
 
@@ -39,6 +41,6 @@ class TaskItemProvider implements ProviderInterface
             throw new AccessDeniedHttpException();
         }
 
-        return TaskCollectionProvider::toResource($task);
+        return $this->transformer->toResource($task);
     }
 }
