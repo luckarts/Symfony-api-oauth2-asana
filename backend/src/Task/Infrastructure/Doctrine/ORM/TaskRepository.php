@@ -25,10 +25,10 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
     }
 
     /** @return list<Task> */
-    public function findAll(): array
+    public function findByProject(string $projectId): array
     {
         /** @var list<Task> $result */
-        $result = $this->findBy([], ['createdAt' => 'ASC']);
+        $result = $this->findBy(['project' => $projectId], ['orderIndex' => 'ASC', 'createdAt' => 'ASC']);
 
         return $result;
     }

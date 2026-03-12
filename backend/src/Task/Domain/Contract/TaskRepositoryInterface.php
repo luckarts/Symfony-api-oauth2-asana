@@ -11,7 +11,7 @@ interface TaskRepositoryInterface
     public function findById(string $id): ?Task;
 
     /** @return list<Task> */
-    public function findAll(): array;
+    public function findByProject(string $projectId): array;
 
     public function save(Task $task): void;
 
