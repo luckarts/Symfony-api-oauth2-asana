@@ -6,7 +6,7 @@ namespace App\Shared\Infrastructure\Mapper;
 
 use Symfony\Component\Yaml\Yaml;
 
-final class MappingConfigLoader
+final class MappingConfigLoader implements MappingConfigLoaderInterface
 {
     /** @var array<string, array<string, mixed>> class FQCN => resource config */
     private array $configs = [];
@@ -60,8 +60,8 @@ final class MappingConfigLoader
             return;
         }
 
-        $files = glob($dir . '/*_mapping.yaml');
-        if ($files === false) {
+        $files = glob($dir.'/*_mapping.yaml');
+        if (false === $files) {
             return;
         }
 
