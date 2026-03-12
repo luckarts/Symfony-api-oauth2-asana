@@ -24,9 +24,7 @@ class CreateTaskTest extends AbstractApiTestCase
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
             'title' => 'My first task',
         ]);
-        if (Response::HTTP_CREATED !== $response->getStatusCode()) {
-            echo "\nDEBUG RESPONSE:\n".$response->getContent()."\n";
-        }
+
         $this->assertSame(Response::HTTP_CREATED, $response->getStatusCode());
 
         $data = json_decode($response->getContent(), true);

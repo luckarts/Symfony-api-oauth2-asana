@@ -10,6 +10,9 @@ resources:
                 operations: [read, write]
             status:
                 operations: [read, write]
+                transform:
+                    type: enum
+                    class: App\Task\Domain\Enum\TaskStatus
             columnId:
                 operations: [read, write]
             orderIndex:
@@ -18,6 +21,9 @@ resources:
                 operations: [read, write]
             dueDate:
                 operations: [read, write]
+                transform:
+                    type: datetime
+                    format: !php/const DateTimeInterface::ATOM
             projectId:
                 operations: [read]
             createdAt:

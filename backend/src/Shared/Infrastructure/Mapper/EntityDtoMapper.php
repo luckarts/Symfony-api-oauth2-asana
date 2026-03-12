@@ -7,7 +7,7 @@ namespace App\Shared\Infrastructure\Mapper;
 final class EntityDtoMapper
 {
     public function __construct(
-        private readonly MappingConfigLoader $configLoader,
+        private readonly MappingConfigLoaderInterface $configLoader,
     ) {
     }
 
@@ -25,7 +25,7 @@ final class EntityDtoMapper
     {
         $config = $this->configLoader->getConfigForClass($dtoClass);
 
-        if ($config === null) {
+        if (null === $config) {
             throw new \InvalidArgumentException(\sprintf('No mapping config found for class "%s".', $dtoClass));
         }
 
@@ -36,7 +36,12 @@ final class EntityDtoMapper
                 continue;
             }
 
-            $value = $this->getEntityValue($entity, $field);
+            $found = false;
+            $value = $this->getEntityValue($entity, $field, $found);
+
+            if (!$found) {
+                continue;
+            }
 
             if (isset($fieldConfig['transform'])) {
                 $value = $this->applyTransform($value, $fieldConfig['transform']);
@@ -56,7 +61,7 @@ final class EntityDtoMapper
     {
         $config = $this->configLoader->getConfigForClass($dto::class);
 
-        if ($config === null) {
+        if (null === $config) {
             throw new \InvalidArgumentException(\sprintf('No mapping config found for class "%s".', $dto::class));
         }
 
@@ -65,40 +70,85 @@ final class EntityDtoMapper
                 continue;
             }
 
-            $setter = 'set' . ucfirst($field);
+            $value = $dto->{$field};
+
+            if (isset($fieldConfig['transform'])) {
+                $value = $this->applyReverseTransform($value, $fieldConfig['transform']);
+            }
+
+            $setter = 'set'.ucfirst($field);
             if (method_exists($entity, $setter)) {
-                $entity->{$setter}($dto->{$field});
+                $entity->{$setter}($value);
             }
         }
     }
 
-    private function getEntityValue(object $entity, string $field): mixed
+    private function getEntityValue(object $entity, string $field, bool &$found = false): mixed
     {
-        $getter = 'get' . ucfirst($field);
+        $found = true;
+
+        if (method_exists($entity, $field)) {
+            return $entity->{$field}();
+        }
+
+        $getter = 'get'.ucfirst($field);
         if (method_exists($entity, $getter)) {
             return $entity->{$getter}();
         }
 
-        $isser = 'is' . ucfirst($field);
+        $isser = 'is'.ucfirst($field);
         if (method_exists($entity, $isser)) {
             return $entity->{$isser}();
         }
 
+        $found = false;
+
         return null;
     }
 
-    private function applyTransform(mixed $value, string $transform): mixed
+    private function applyTransform(mixed $value, mixed $transform): mixed
     {
-        if (str_starts_with($transform, 'datetime:')) {
+        if (\is_string($transform) && str_starts_with($transform, 'datetime:')) {
             $format = substr($transform, 9);
 
             if (!$value instanceof \DateTimeInterface) {
                 return $value;
             }
 
-            $constant = \DateTimeInterface::class . '::' . $format;
+            $constant = \DateTimeInterface::class.'::'.$format;
 
             return $value->format(\defined($constant) ? \constant($constant) : $format);
+        }
+
+        if (\is_array($transform)) {
+            $type = $transform['type'] ?? null;
+            if ('datetime' === $type) {
+                $format = $transform['format'] ?? \DateTimeInterface::ATOM;
+                if (!$value instanceof \DateTimeInterface) {
+                    return $value;
+                }
+
+                return $value->format($format);
+            }
+            if ('enum' === $type && $value instanceof \BackedEnum) {
+                return $value->value;
+            }
+        }
+
+        return $value;
+    }
+
+    private function applyReverseTransform(mixed $value, mixed $transform): mixed
+    {
+        if (null === $value) {
+            return null;
+        }
+
+        if (\is_array($transform) && isset($transform['type']) && 'enum' === $transform['type']) {
+            $class = $transform['class'] ?? null;
+            if ($class && \is_string($class) && \enum_exists($class) && \method_exists($class, 'from')) {
+                return $class::from($value);
+            }
         }
 
         return $value;
