@@ -33,6 +33,15 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
         return $result;
     }
 
+    /** @return list<Task> */
+    public function findSubtasks(string $parentId): array
+    {
+        /** @var list<Task> $result */
+        $result = $this->findBy(['parent' => $parentId], ['orderIndex' => 'ASC']);
+
+        return $result;
+    }
+
     public function save(Task $task): void
     {
         $this->getEntityManager()->persist($task);
