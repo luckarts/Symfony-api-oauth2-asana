@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Task\Domain\Entity;
 
 use App\Task\Domain\Enum\TaskStatus;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 
@@ -26,6 +28,14 @@ class Task
     #[ORM\ManyToOne(targetEntity: \App\Project\Domain\Entity\BoardColumn::class)]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?\App\Project\Domain\Entity\BoardColumn $column = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
+    #[ORM\JoinColumn(name: 'parent_task_id', nullable: true, onDelete: 'SET NULL')]
+    private ?self $parent = null;
+
+    /** @var Collection<int, Task> */
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'parent', fetch: 'EXTRA_LAZY', cascade: ['persist'])]
+    private Collection $children;
 
     #[ORM\Column(type: 'string', length: 255)]
     private string $title;
@@ -52,6 +62,7 @@ class Task
     {
         $this->title = $title;
         $this->project = $project;
+        $this->children = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -76,6 +87,24 @@ class Task
         $this->column = $column;
 
         return $this;
+    }
+
+    public function getParent(): ?self
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?self $parent): self
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /** @return Collection<int, Task> */
+    public function getChildren(): Collection
+    {
+        return $this->children;
     }
 
     public function getTitle(): string

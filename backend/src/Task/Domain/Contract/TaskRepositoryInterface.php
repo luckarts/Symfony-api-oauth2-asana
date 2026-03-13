@@ -13,6 +13,9 @@ interface TaskRepositoryInterface
     /** @return list<Task> */
     public function findByProject(string $projectId): array;
 
+    /** @return list<Task> */
+    public function findSubtasks(string $parentId): array;
+
     public function save(Task $task): void;
 
     public function remove(Task $task): void;

@@ -19,7 +19,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Group('smoke')]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_updates_title(): void
+    public function patchTaskUpdatesTitle(): void
     {
         $token = $this->auth('task-patch-title@example.com');
         $project = $this->createProject($token, 'Patch title project');
@@ -42,7 +42,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_assigns_column(): void
+    public function patchTaskAssignsColumn(): void
     {
         $token = $this->auth('task-patch-col@example.com');
         $project = $this->createProject($token, 'Patch column project');
@@ -67,7 +67,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_removes_column(): void
+    public function patchTaskRemovesColumn(): void
     {
         $token = $this->auth('task-patch-rmcol@example.com');
         $project = $this->createProject($token, 'Patch remove col project');
@@ -92,7 +92,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_marks_as_completed(): void
+    public function patchTaskMarksAsCompleted(): void
     {
         $token = $this->auth('task-patch-done@example.com');
         $project = $this->createProject($token, 'Patch done project');
@@ -113,7 +113,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_sets_due_date(): void
+    public function patchTaskSetsDueDate(): void
     {
         $token = $this->auth('task-patch-due@example.com');
         $project = $this->createProject($token, 'Patch due project');
@@ -134,7 +134,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_invalid_due_date_returns_422(): void
+    public function patchTaskInvalidDueDateReturns422(): void
     {
         $token = $this->auth('task-patch-baddue@example.com');
         $project = $this->createProject($token, 'Patch bad due project');
@@ -154,7 +154,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_cross_project_column_returns_422(): void
+    public function patchTaskCrossProjectColumnReturns422(): void
     {
         $token = $this->auth('task-patch-crosscol@example.com');
         $projectA = $this->createProject($token, 'Cross col project A');
@@ -179,7 +179,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_not_found_returns_404(): void
+    public function patchTaskNotFoundReturns404(): void
     {
         $token = $this->auth('task-patch-404@example.com');
         $project = $this->createProject($token, 'Patch 404 project');
@@ -198,7 +198,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_wrong_project_returns_404(): void
+    public function patchTaskWrongProjectReturns404(): void
     {
         $token = $this->auth('task-patch-wrongproj@example.com');
         $projectA = $this->createProject($token, 'Wrong proj A');
@@ -219,7 +219,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_forbidden_for_non_owner(): void
+    public function patchTaskForbiddenForNonOwner(): void
     {
         $ownerToken = $this->auth('task-patch-owner@example.com');
         $project = $this->createProject($ownerToken, 'Patch owner project');
@@ -241,7 +241,7 @@ class UpdateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function patch_task_requires_authentication(): void
+    public function patchTaskRequiresAuthentication(): void
     {
         $token = $this->auth('task-patch-unauth@example.com');
         $project = $this->createProject($token, 'Patch unauth project');
@@ -256,6 +256,120 @@ class UpdateTaskTest extends AbstractApiTestCase
         );
 
         $this->assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+    }
+
+    // -------------------------------------------------------------------------
+    // Subtask (parentTaskId)
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchSubtaskAssignsParent(): void
+    {
+        $token = $this->auth('subtask-patch-assign@example.com');
+        $project = $this->createProject($token, 'Patch subtask project');
+        $parent = $this->createTask($token, $project['id'], 'Parent task');
+        $child = $this->createTask($token, $project['id'], 'Standalone task');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$child['id'],
+            $token,
+            ['parentTaskId' => $parent['id']],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertSame($parent['id'], $data['parentTaskId']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchSubtaskRemovesParent(): void
+    {
+        $token = $this->auth('subtask-patch-remove@example.com');
+        $project = $this->createProject($token, 'Patch remove parent project');
+        $parent = $this->createTask($token, $project['id'], 'Parent task');
+        $child = $this->createTask($token, $project['id'], 'Child task', ['parentTaskId' => $parent['id']]);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$child['id'],
+            $token,
+            ['parentTaskId' => null],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertNull(json_decode($response->getContent(), true)['parentTaskId']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchSubtaskParentNotFoundReturns404(): void
+    {
+        $token = $this->auth('subtask-patch-parent404@example.com');
+        $project = $this->createProject($token, 'Patch parent 404 project');
+        $task = $this->createTask($token, $project['id'], 'Task');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$task['id'],
+            $token,
+            ['parentTaskId' => '00000000-0000-0000-0000-000000000000'],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchSubtaskParentCrossProjectReturns404(): void
+    {
+        $token = $this->auth('subtask-patch-crossproj@example.com');
+        $projectA = $this->createProject($token, 'Patch cross A');
+        $projectB = $this->createProject($token, 'Patch cross B');
+        $parentInB = $this->createTask($token, $projectB['id'], 'Parent in B');
+        $taskInA = $this->createTask($token, $projectA['id'], 'Task in A');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$projectA['id'].'/tasks/'.$taskInA['id'],
+            $token,
+            ['parentTaskId' => $parentInB['id']],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchSubtaskParentIsSubtaskReturns422(): void
+    {
+        $token = $this->auth('subtask-patch-depth@example.com');
+        $project = $this->createProject($token, 'Patch depth project');
+        $root = $this->createTask($token, $project['id'], 'Root task');
+        $child = $this->createTask($token, $project['id'], 'Child task', ['parentTaskId' => $root['id']]);
+        $other = $this->createTask($token, $project['id'], 'Other task');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$other['id'],
+            $token,
+            ['parentTaskId' => $child['id']],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
     }
 
     // -------------------------------------------------------------------------

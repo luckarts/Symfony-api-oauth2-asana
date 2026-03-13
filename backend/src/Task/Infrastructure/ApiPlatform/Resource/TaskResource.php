@@ -73,6 +73,11 @@ class TaskResource
 
     public ?string $columnId = null;
 
+    public ?string $parentTaskId = null;
+
+    /** @var array<int, array{id: string, title: string, status: string}> */
+    public array $subtasks = [];
+
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     public string $title = '';

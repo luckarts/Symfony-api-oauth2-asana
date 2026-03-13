@@ -11,14 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CreateTaskTest extends AbstractApiTestCase
 {
+    // -------------------------------------------------------------------------
+    // Task (root)
+    // -------------------------------------------------------------------------
+
     #[Test]
     #[Group('smoke')]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_success(): void
+    public function createTaskSuccess(): void
     {
-        $this->createUser('task-create@example.com', 'password123');
-        $token = $this->getOAuth2Token('task-create@example.com', 'password123');
+        $token = $this->auth('task-create@example.com');
         $project = $this->createProject($token, 'Task project');
 
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
@@ -49,10 +52,9 @@ class CreateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_with_order_index(): void
+    public function createTaskWithOrderIndex(): void
     {
-        $this->createUser('task-order@example.com', 'password123');
-        $token = $this->getOAuth2Token('task-order@example.com', 'password123');
+        $token = $this->auth('task-order@example.com');
         $project = $this->createProject($token, 'Order project');
 
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
@@ -68,10 +70,9 @@ class CreateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_fails_with_empty_title(): void
+    public function createTaskFailsWithEmptyTitle(): void
     {
-        $this->createUser('task-empty@example.com', 'password123');
-        $token = $this->getOAuth2Token('task-empty@example.com', 'password123');
+        $token = $this->auth('task-empty@example.com');
         $project = $this->createProject($token, 'Validation project');
 
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
@@ -84,10 +85,9 @@ class CreateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_project_not_found(): void
+    public function createTaskProjectNotFound(): void
     {
-        $this->createUser('task-404@example.com', 'password123');
-        $token = $this->getOAuth2Token('task-404@example.com', 'password123');
+        $token = $this->auth('task-404@example.com');
 
         $response = $this->apiRequest(
             'POST',
@@ -102,14 +102,12 @@ class CreateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_forbidden_for_non_owner(): void
+    public function createTaskForbiddenForNonOwner(): void
     {
-        $this->createUser('task-owner@example.com', 'password123');
-        $ownerToken = $this->getOAuth2Token('task-owner@example.com', 'password123');
+        $ownerToken = $this->auth('task-owner@example.com');
         $project = $this->createProject($ownerToken, 'Owner project');
 
-        $this->createUser('task-other@example.com', 'password123');
-        $otherToken = $this->getOAuth2Token('task-other@example.com', 'password123');
+        $otherToken = $this->auth('task-other@example.com');
 
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $otherToken, [
             'title' => 'Stolen task',
@@ -121,10 +119,9 @@ class CreateTaskTest extends AbstractApiTestCase
     #[Test]
     #[Group('e2e')]
     #[Group('task')]
-    public function create_task_requires_authentication(): void
+    public function createTaskRequiresAuthentication(): void
     {
-        $this->createUser('task-unauth@example.com', 'password123');
-        $token = $this->getOAuth2Token('task-unauth@example.com', 'password123');
+        $token = $this->auth('task-unauth@example.com');
         $project = $this->createProject($token, 'Auth project');
 
         $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', null, [
@@ -134,11 +131,130 @@ class CreateTaskTest extends AbstractApiTestCase
         $this->assertSame(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
     }
 
+    // -------------------------------------------------------------------------
+    // Subtask (task with parentTaskId)
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function createSubtaskSuccess(): void
+    {
+        $token = $this->auth('subtask-create@example.com');
+        $project = $this->createProject($token, 'Subtask project');
+        $parent = $this->createTask($token, $project['id'], 'Parent task');
+
+        $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
+            'title' => 'Child task',
+            'parentTaskId' => $parent['id'],
+        ]);
+
+        $this->assertSame(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $child = json_decode($response->getContent(), true);
+        $this->assertSame('Child task', $child['title']);
+        $this->assertSame($parent['id'], $child['parentTaskId']);
+        $this->assertSame([], $child['subtasks']);
+
+        // Parent now has 1 subtask embedded
+        $parentGet = $this->apiRequest('GET', '/api/projects/'.$project['id'].'/tasks/'.$parent['id'], $token);
+        $parentData = json_decode($parentGet->getContent(), true);
+        $this->assertCount(1, $parentData['subtasks']);
+        $this->assertSame($child['id'], $parentData['subtasks'][0]['id']);
+        $this->assertSame('Child task', $parentData['subtasks'][0]['title']);
+        $this->assertSame('todo', $parentData['subtasks'][0]['status']);
+
+        // Verify child persistence via GET item
+        $childGet = $this->apiRequest('GET', '/api/projects/'.$project['id'].'/tasks/'.$child['id'], $token);
+        $this->assertSame(Response::HTTP_OK, $childGet->getStatusCode());
+        $childData = json_decode($childGet->getContent(), true);
+        $this->assertSame($child['id'], $childData['id']);
+        $this->assertSame('Child task', $childData['title']);
+        $this->assertSame([], $childData['subtasks']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function createSubtaskParentNotFoundReturns404(): void
+    {
+        $token = $this->auth('subtask-parent404@example.com');
+        $project = $this->createProject($token, 'Subtask 404 project');
+
+        $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
+            'title' => 'Orphan',
+            'parentTaskId' => '00000000-0000-0000-0000-000000000000',
+        ]);
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function createSubtaskParentCrossProjectReturns404(): void
+    {
+        $token = $this->auth('subtask-crossproj@example.com');
+        $projectA = $this->createProject($token, 'Subtask proj A');
+        $projectB = $this->createProject($token, 'Subtask proj B');
+        $parentInB = $this->createTask($token, $projectB['id'], 'Parent in B');
+
+        $response = $this->apiRequest('POST', '/api/projects/'.$projectA['id'].'/tasks', $token, [
+            'title' => 'Child in A with parent from B',
+            'parentTaskId' => $parentInB['id'],
+        ]);
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function createSubtaskOfSubtaskReturns422(): void
+    {
+        $token = $this->auth('subtask-depth@example.com');
+        $project = $this->createProject($token, 'Depth project');
+        $parent = $this->createTask($token, $project['id'], 'Root task');
+        $child = $this->createTask($token, $project['id'], 'Child task', ['parentTaskId' => $parent['id']]);
+
+        $response = $this->apiRequest('POST', '/api/projects/'.$project['id'].'/tasks', $token, [
+            'title' => 'Grandchild task',
+            'parentTaskId' => $child['id'],
+        ]);
+
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function auth(string $email): string
+    {
+        $this->createUser($email, 'password123');
+
+        return $this->getOAuth2Token($email, 'password123');
+    }
+
     /** @return array<string, mixed> */
     private function createProject(string $token, string $name): array
     {
         return json_decode(
             $this->apiRequest('POST', '/api/projects', $token, ['name' => $name])->getContent(),
+            true,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $extra
+     *
+     * @return array<string, mixed>
+     */
+    private function createTask(string $token, string $projectId, string $title, array $extra = []): array
+    {
+        return json_decode(
+            $this->apiRequest('POST', '/api/projects/'.$projectId.'/tasks', $token, array_merge(['title' => $title], $extra))->getContent(),
             true,
         );
     }
