@@ -66,6 +66,19 @@ class UpdateTaskProcessor implements ProcessorInterface
             $task->setColumn(null);
         }
 
+        if (null !== $data->parentTaskId) {
+            $parent = $this->taskRepository->findById($data->parentTaskId);
+            if (null === $parent || (string) $parent->getProject()->getId() !== $projectId) {
+                throw new NotFoundHttpException(sprintf('Parent task "%s" not found.', $data->parentTaskId));
+            }
+            if (null !== $parent->getParent()) {
+                throw new UnprocessableEntityHttpException('parentTaskId must be a root task (nesting limited to 1 level)');
+            }
+            $task->setParent($parent);
+        } else {
+            $task->setParent(null);
+        }
+
         $task->setOrderIndex($data->orderIndex);
         $task->setIsCompleted($data->isCompleted);
 
