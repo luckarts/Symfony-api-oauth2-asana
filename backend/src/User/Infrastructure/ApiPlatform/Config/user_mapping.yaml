@@ -30,7 +30,9 @@ resources:
             createdAt:
                 type: string
                 operations: [read]
-                transform: "datetime:ATOM"
+                transform:
+                    type: datetime
+                    format: !php/const DateTimeInterface::ATOM
 
     register_user:
         class: App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest
