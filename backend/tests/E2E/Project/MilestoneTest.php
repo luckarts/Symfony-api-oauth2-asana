@@ -20,6 +20,98 @@ class MilestoneTest extends AbstractApiTestCase
         );
     }
 
+     /** @return array<string, mixed> */
+    private function createMilestone(string $token, string $projectId, string $title = 'Sprint 1', ?string $dueDate = '2026-07-01T00:00:00+00:00'): array
+    {
+        $body = ['title' => $title];
+        if (null !== $dueDate) {
+            $body['dueDate'] = $dueDate;
+        }
+
+        return json_decode(
+            $this->apiRequest('POST', '/api/projects/'.$projectId.'/milestones', $token, $body)->getContent(),
+            true,
+        );
+    }
+    
+     // ─── GET collection ───────────────────────────────────────────────────────
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function getMilestonesReturnsEmptyCollection(): void
+    {
+        $this->createUser('ms-get@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-get@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Milestone project');
+
+        $response = $this->apiRequest('GET', '/api/projects/'.$project['id'].'/milestones', $token);
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertIsArray($data['member']);
+        $this->assertCount(0, $data['member']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function getMilestoneCollectionProjectNotFound(): void
+    {
+        $this->createUser('ms-get-pnf@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-get-pnf@example.com', 'password123');
+
+        $response = $this->apiRequest(
+            'GET',
+            '/api/projects/00000000-0000-0000-0000-000000000000/milestones',
+            $token,
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function getMilestonesForbiddenForNonOwner(): void
+    {
+        $this->createUser('ms-owner@example.com', 'password123');
+        $ownerToken = $this->getOAuth2Token('ms-owner@example.com', 'password123');
+
+        $project = $this->createProject($ownerToken, 'Owner milestone project');
+
+        $this->createUser('ms-other@example.com', 'password123');
+        $otherToken = $this->getOAuth2Token('ms-other@example.com', 'password123');
+
+        $response = $this->apiRequest('GET', '/api/projects/'.$project['id'].'/milestones', $otherToken);
+
+        $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    // ─── GET item ─────────────────────────────────────────────────────────────
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function getMilestoneItemNotFound(): void
+    {
+        $this->createUser('ms-get-404@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-get-404@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Milestone project 404');
+
+        $response = $this->apiRequest(
+            'GET',
+            '/api/projects/'.$project['id'].'/milestones/00000000-0000-0000-0000-000000000000',
+            $token,
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+    
     // ─── POST ─────────────────────────────────────────────────────────────────
 
     #[Test]
@@ -121,4 +213,75 @@ class MilestoneTest extends AbstractApiTestCase
         $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
     }
 
+    // ─── DELETE ───────────────────────────────────────────────────────────────
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function deleteMilestoneReturns204(): void
+    {
+        $this->createUser('ms-del@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-del@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Delete MS project');
+        $milestone = $this->createMilestone($token, $project['id'], 'To delete', null);
+
+        $response = $this->apiRequest(
+            'DELETE',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $token,
+        );
+
+        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
+
+        $getResponse = $this->apiRequest(
+            'GET',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $token,
+        );
+        $this->assertSame(Response::HTTP_NOT_FOUND, $getResponse->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function deleteMilestoneNotFoundReturns404(): void
+    {
+        $this->createUser('ms-del-404@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-del-404@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Del 404 MS project');
+
+        $response = $this->apiRequest(
+            'DELETE',
+            '/api/projects/'.$project['id'].'/milestones/00000000-0000-0000-0000-000000000000',
+            $token,
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function deleteMilestoneForbiddenForNonOwner(): void
+    {
+        $this->createUser('ms-del-owner@example.com', 'password123');
+        $ownerToken = $this->getOAuth2Token('ms-del-owner@example.com', 'password123');
+
+        $project = $this->createProject($ownerToken, 'Del forbidden MS');
+        $milestone = $this->createMilestone($ownerToken, $project['id'], 'To delete', null);
+
+        $this->createUser('ms-del-other@example.com', 'password123');
+        $otherToken = $this->getOAuth2Token('ms-del-other@example.com', 'password123');
+
+        $response = $this->apiRequest(
+            'DELETE',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $otherToken,
+        );
+
+        $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
 }
