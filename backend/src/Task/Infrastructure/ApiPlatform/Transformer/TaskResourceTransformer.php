@@ -23,6 +23,7 @@ final class TaskResourceTransformer
         $resource->projectId = (string) $task->getProject()->getId();
         $resource->columnId = $task->getColumn()?->getId();
         $resource->parentTaskId = $task->getParent()?->getId();
+        $resource->milestoneId = $task->getMilestoneId();
         $resource->subtasks = array_map(
             static fn (Task $child): array => [
                 'id' => (string) $child->getId(),

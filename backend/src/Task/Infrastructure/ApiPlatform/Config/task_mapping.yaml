@@ -17,6 +17,8 @@ resources:
                 operations: [read, write]
             parentTaskId:
                 operations: [read, write]
+            milestoneId:
+                operations: [read, write]
             orderIndex:
                 operations: [read, write]
             isCompleted:

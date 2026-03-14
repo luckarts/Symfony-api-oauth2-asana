@@ -75,6 +75,8 @@ class TaskResource
 
     public ?string $parentTaskId = null;
 
+    public ?string $milestoneId = null;
+
     /** @var array<int, array{id: string, title: string, status: string}> */
     public array $subtasks = [];
 

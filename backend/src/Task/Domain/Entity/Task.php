@@ -29,6 +29,10 @@ class Task
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?\App\Project\Domain\Entity\BoardColumn $column = null;
 
+    #[ORM\ManyToOne(targetEntity: \App\Project\Domain\Entity\Milestone::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?\App\Project\Domain\Entity\Milestone $milestone = null;
+
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
     #[ORM\JoinColumn(name: 'parent_task_id', nullable: true, onDelete: 'SET NULL')]
     private ?self $parent = null;
@@ -87,6 +91,23 @@ class Task
         $this->column = $column;
 
         return $this;
+    }
+
+    public function getMilestone(): ?\App\Project\Domain\Entity\Milestone
+    {
+        return $this->milestone;
+    }
+
+    public function setMilestone(?\App\Project\Domain\Entity\Milestone $milestone): self
+    {
+        $this->milestone = $milestone;
+
+        return $this;
+    }
+
+    public function getMilestoneId(): ?string
+    {
+        return $this->milestone?->getId();
     }
 
     public function getParent(): ?self
