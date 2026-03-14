@@ -7,6 +7,7 @@ namespace App\Task\Infrastructure\ApiPlatform\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
+use App\Project\Domain\Contract\MilestoneRepositoryInterface;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
 use App\Task\Domain\Enum\TaskStatus;
 use App\Task\Infrastructure\ApiPlatform\Resource\TaskResource;
@@ -25,6 +26,7 @@ class UpdateTaskProcessor implements ProcessorInterface
     public function __construct(
         private readonly TaskRepositoryInterface $taskRepository,
         private readonly BoardColumnRepositoryInterface $columnRepository,
+        private readonly MilestoneRepositoryInterface $milestoneRepository,
         private readonly Security $security,
         private readonly TaskResourceTransformer $transformer,
     ) {
@@ -64,6 +66,16 @@ class UpdateTaskProcessor implements ProcessorInterface
             $task->setColumn($column);
         } else {
             $task->setColumn(null);
+        }
+
+        if (null !== $data->milestoneId) {
+            $milestone = $this->milestoneRepository->findById($data->milestoneId);
+            if (null === $milestone || (string) $milestone->getProject()->getId() !== $projectId) {
+                throw new UnprocessableEntityHttpException('milestoneId does not belong to this project');
+            }
+            $task->setMilestone($milestone);
+        } else {
+            $task->setMilestone(null);
         }
 
         if (null !== $data->parentTaskId) {
