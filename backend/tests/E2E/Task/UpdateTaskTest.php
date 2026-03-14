@@ -373,6 +373,78 @@ class UpdateTaskTest extends AbstractApiTestCase
     }
 
     // -------------------------------------------------------------------------
+    // Milestone assignment (milestoneId)
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchTaskAssignsMilestone(): void
+    {
+        $token = $this->auth('task-patch-ms-assign@example.com');
+        $project = $this->createProject($token, 'Milestone assign patch project');
+        $milestone = $this->createMilestone($token, $project['id'], 'Sprint 1');
+        $task = $this->createTask($token, $project['id'], 'Task without milestone');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$task['id'],
+            $token,
+            ['milestoneId' => $milestone['id']],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        $this->assertSame($milestone['id'], $data['milestoneId']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchTaskUnsetsMilestone(): void
+    {
+        $token = $this->auth('task-patch-ms-unset@example.com');
+        $project = $this->createProject($token, 'Milestone unset patch project');
+        $milestone = $this->createMilestone($token, $project['id'], 'Sprint 1');
+        $task = $this->createTask($token, $project['id'], 'Task with milestone', ['milestoneId' => $milestone['id']]);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/tasks/'.$task['id'],
+            $token,
+            ['milestoneId' => null],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertNull(json_decode($response->getContent(), true)['milestoneId'] ?? null);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('task')]
+    public function patchTaskCrossProjectMilestoneReturns422(): void
+    {
+        $token = $this->auth('task-patch-ms-xproj@example.com');
+        $projectA = $this->createProject($token, 'Milestone cross A');
+        $projectB = $this->createProject($token, 'Milestone cross B');
+        $milestoneB = $this->createMilestone($token, $projectB['id'], 'Sprint B');
+        $task = $this->createTask($token, $projectA['id'], 'Task in A');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$projectA['id'].'/tasks/'.$task['id'],
+            $token,
+            ['milestoneId' => $milestoneB['id']],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
@@ -401,6 +473,15 @@ class UpdateTaskTest extends AbstractApiTestCase
     {
         return json_decode(
             $this->apiRequest('POST', '/api/projects/'.$projectId.'/tasks', $token, array_merge(['title' => $title], $extra))->getContent(),
+            true,
+        );
+    }
+
+    /** @return array<string, mixed> */
+    private function createMilestone(string $token, string $projectId, string $title): array
+    {
+        return json_decode(
+            $this->apiRequest('POST', '/api/projects/'.$projectId.'/milestones', $token, ['title' => $title])->getContent(),
             true,
         );
     }

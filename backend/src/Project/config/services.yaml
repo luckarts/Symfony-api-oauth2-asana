@@ -17,3 +17,6 @@ services:
 
     App\Project\Domain\Contract\BoardColumnRepositoryInterface:
         alias: App\Project\Infrastructure\Doctrine\DoctrineBoardColumnRepository
+
+    App\Project\Domain\Contract\MilestoneRepositoryInterface:
+        alias: App\Project\Infrastructure\Doctrine\DoctrineMilestoneRepository
