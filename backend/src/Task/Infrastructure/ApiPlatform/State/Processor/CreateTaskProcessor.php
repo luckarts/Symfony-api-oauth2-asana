@@ -7,6 +7,7 @@ namespace App\Task\Infrastructure\ApiPlatform\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Project\Domain\Contract\BoardColumnRepositoryInterface;
+use App\Project\Domain\Contract\MilestoneRepositoryInterface;
 use App\Project\Domain\Contract\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Security\PersonalProjectVoter;
 use App\Task\Domain\Contract\TaskRepositoryInterface;
@@ -27,6 +28,7 @@ class CreateTaskProcessor implements ProcessorInterface
         private readonly TaskRepositoryInterface $taskRepository,
         private readonly ProjectRepositoryInterface $projectRepository,
         private readonly BoardColumnRepositoryInterface $columnRepository,
+        private readonly MilestoneRepositoryInterface $milestoneRepository,
         private readonly Security $security,
         private readonly TaskResourceTransformer $transformer,
     ) {
@@ -55,6 +57,14 @@ class CreateTaskProcessor implements ProcessorInterface
                 throw new UnprocessableEntityHttpException('columnId does not belong to this project');
             }
             $task->setColumn($column);
+        }
+
+        if (null !== $data->milestoneId) {
+            $milestone = $this->milestoneRepository->findById($data->milestoneId);
+            if (null === $milestone || (string) $milestone->getProject()->getId() !== $projectId) {
+                throw new UnprocessableEntityHttpException('milestoneId does not belong to this project');
+            }
+            $task->setMilestone($milestone);
         }
 
         if (null !== $data->parentTaskId) {
