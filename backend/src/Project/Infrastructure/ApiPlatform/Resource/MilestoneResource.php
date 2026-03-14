@@ -10,8 +10,10 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
 use App\Project\Infrastructure\ApiPlatform\State\Processor\CreateMilestoneProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Processor\DeleteMilestoneProcessor;
+use App\Project\Infrastructure\ApiPlatform\State\Processor\UpdateMilestoneProcessor;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\MilestoneCollectionProvider;
 use App\Project\Infrastructure\ApiPlatform\State\Provider\MilestoneItemProvider;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,6 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriVariables: [
                 'projectId' => new Link(fromClass: self::class, identifiers: ['projectId']),
             ],
+            validationContext: ['groups' => ['Default', 'milestone:create']],
             processor: CreateMilestoneProcessor::class,
             security: "is_granted('ROLE_USER')",
         ),
@@ -54,6 +57,16 @@ use Symfony\Component\Validator\Constraints as Assert;
             read: false,
             security: "is_granted('ROLE_USER')",
         ),
+        new Patch(
+            uriTemplate: '/projects/{projectId}/milestones/{id}',
+            uriVariables: [
+                'projectId' => new Link(fromClass: self::class, identifiers: ['projectId']),
+                'id' => new Link(fromClass: self::class, identifiers: ['id']),
+            ],
+            read: false,
+            processor: UpdateMilestoneProcessor::class,
+            security: "is_granted('ROLE_USER')",
+        ),
     ],
     routePrefix: '/api',
 )]
@@ -63,7 +76,7 @@ class MilestoneResource
 
     public string $projectId = '';
 
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['milestone:create'])]
     #[Assert\Length(max: 255)]
     public string $title = '';
 

@@ -33,7 +33,7 @@ class MilestoneTest extends AbstractApiTestCase
             true,
         );
     }
-    
+
      // ─── GET collection ───────────────────────────────────────────────────────
 
     #[Test]
@@ -280,6 +280,130 @@ class MilestoneTest extends AbstractApiTestCase
             'DELETE',
             '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
             $otherToken,
+        );
+
+        $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('smoke')]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function patchMilestoneTitleReturns200(): void
+    {
+        $this->createUser('ms-upd@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-upd@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Upd MS project');
+        $milestone = $this->createMilestone($token, $project['id']);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $token,
+            ['title' => 'Sprint 1 — Updated'],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertSame('Sprint 1 — Updated', $data['title']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function patchMilestoneStatusReturns200(): void
+    {
+        $this->createUser('ms-upd-status@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-upd-status@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Status MS project');
+        $milestone = $this->createMilestone($token, $project['id']);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $token,
+            ['status' => 'completed'],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertSame('completed', $data['status']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function patchMilestoneDueDateNullClearsDate(): void
+    {
+        $this->createUser('ms-upd-date@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-upd-date@example.com', 'password123');
+
+        $project = $this->createProject($token, 'Date clear MS project');
+        $milestone = $this->createMilestone($token, $project['id']);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $token,
+            ['dueDate' => null],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertNull($data['dueDate']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function patchMilestoneFromOtherProjectReturns404(): void
+    {
+        $this->createUser('ms-upd-404@example.com', 'password123');
+        $token = $this->getOAuth2Token('ms-upd-404@example.com', 'password123');
+
+        $project1 = $this->createProject($token, 'P1 MS');
+        $project2 = $this->createProject($token, 'P2 MS');
+        $milestone = $this->createMilestone($token, $project1['id']);
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project2['id'].'/milestones/'.$milestone['id'],
+            $token,
+            ['title' => 'Cross-project patch'],
+            'application/merge-patch+json',
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('milestone')]
+    public function patchMilestoneForbiddenForNonOwner(): void
+    {
+        $this->createUser('ms-upd-owner@example.com', 'password123');
+        $ownerToken = $this->getOAuth2Token('ms-upd-owner@example.com', 'password123');
+
+        $project = $this->createProject($ownerToken, 'Forbidden MS project');
+        $milestone = $this->createMilestone($ownerToken, $project['id']);
+
+        $this->createUser('ms-upd-other@example.com', 'password123');
+        $otherToken = $this->getOAuth2Token('ms-upd-other@example.com', 'password123');
+
+        $response = $this->apiRequest(
+            'PATCH',
+            '/api/projects/'.$project['id'].'/milestones/'.$milestone['id'],
+            $otherToken,
+            ['title' => 'Forbidden update'],
+            'application/merge-patch+json',
         );
 
         $this->assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
