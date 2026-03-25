@@ -55,7 +55,7 @@ function handleSubmit() {
       </h1>
     </div>
 
-    <form class="space-y-4" @submit.prevent="handleSubmit">
+    <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
       <Input
         v-model="name"
         type="text"
