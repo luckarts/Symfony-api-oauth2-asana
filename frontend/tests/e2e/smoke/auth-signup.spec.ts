@@ -36,13 +36,17 @@ test.describe('@smoke Signup', () => {
     await expect(page.getByText('au moins 8 caractères')).toBeVisible()
   })
 
-  test.skip('happy path — signup réussi redirige vers / [TODO: backend doit retourner token]', async ({ page }) => {
+  test('happy path — signup réussi redirige vers /', async ({ page }) => {
+    test.skip(!!process.env.CI, 'Backend Symfony non disponible en CI')
+
     const email = `e2e-signup-${Date.now()}@test.com`
     await page.goto('/auth/signup')
+    await page.waitForLoadState('networkidle')
     await page.getByLabel('Nom complet').fill('E2E User')
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Mot de passe').fill('motdepasse123')
     await page.getByRole('button', { name: 'Créer mon compte' }).click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Bienvenue !' })).toBeVisible()
     await expect(page).toHaveURL('/')
   })
 
