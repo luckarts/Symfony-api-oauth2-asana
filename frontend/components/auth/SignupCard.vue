@@ -3,7 +3,6 @@ import { useField, required, email as emailRule, min } from '~/composables/useFi
 
 defineProps<{
   loading: boolean
-  error: string | null
 }>()
 
 const emit = defineEmits<{
@@ -81,8 +80,6 @@ function handleSubmit() {
         :disabled="loading"
         @blur="touchPassword()"
       />
-
-      <p v-if="error" class="text-sm text-red-500">{{ error }}</p>
 
       <Button
         type="submit"
