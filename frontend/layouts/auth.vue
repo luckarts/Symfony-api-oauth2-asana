@@ -25,7 +25,11 @@ function toggleTheme() {
         {{ isDark ? t('user.lightMode') : t('user.darkMode') }}
       </Button>
       <p>©2026 Horizon UI. All Rights Reserved.</p>
-     
+      <nav class="flex gap-6">
+        <AppLink href="#">Support</AppLink>
+        <AppLink href="#">License</AppLink>
+        <AppLink href="#">Terms of Use</AppLink>
+      </nav>
     </footer>
   </div>
 </template>
