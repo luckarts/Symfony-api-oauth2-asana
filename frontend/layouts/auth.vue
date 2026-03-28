@@ -24,7 +24,7 @@ function toggleTheme() {
         </template>
         {{ isDark ? t('user.lightMode') : t('user.darkMode') }}
       </Button>
-      <p>©2026 Horizon UI. All Rights Reserved.</p>
+      <Text as="p">©2026 Horizon UI. All Rights Reserved.</Text>
       <nav class="flex gap-6">
         <AppLink href="#">Support</AppLink>
         <AppLink href="#">License</AppLink>
