@@ -39,7 +39,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-sm space-y-5">
+  <Card variant="shadow" class="w-full max-w-sm">
     <div class="flex flex-col items-center gap-3">
       <AppLogo size="md" />
       <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -91,11 +91,9 @@ function handleSubmit() {
       </Button>
     </form>
 
-    <p class="text-center text-sm text-gray-500">
+    <Text as="p" class="text-center">
       Déjà un compte ?
-      <NuxtLink to="/auth/login" class="font-medium text-brand-500 hover:underline">
-        Se connecter
-      </NuxtLink>
-    </p>
-  </div>
+      <AppLink to="/auth/login">Se connecter</AppLink>
+    </Text>
+  </Card>
 </template>
