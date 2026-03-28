@@ -38,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "@luckarts/ui": "workspace:*",
+    "@iconify-json/heroicons": "^1.2.0",
     "@nuxt/ui": "^3.0.0",
     "@pinia/nuxt": "^0.5.1",
     "@vueuse/core": "^14.0.0",
