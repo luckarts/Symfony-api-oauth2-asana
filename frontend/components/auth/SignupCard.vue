@@ -42,9 +42,7 @@ function handleSubmit() {
   <Card variant="shadow" class="w-full max-w-sm">
     <div class="flex flex-col items-center gap-3">
       <AppLogo size="md" />
-      <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
-        Créer un compte
-      </h1>
+      <Heading :level="1" size="lg">Créer un compte</Heading>
     </div>
 
     <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
@@ -93,7 +91,7 @@ function handleSubmit() {
 
     <Text as="p" class="text-center">
       Déjà un compte ?
-      <AppLink to="/auth/login">Se connecter</AppLink>
+      <AppLink variant="brand" to="/auth/login">Se connecter</AppLink>
     </Text>
   </Card>
 </template>
