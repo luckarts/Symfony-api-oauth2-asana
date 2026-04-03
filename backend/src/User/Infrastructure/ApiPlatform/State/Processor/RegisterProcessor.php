@@ -2,26 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\User\Infrastructure\State\Processor;
+namespace App\User\Infrastructure\ApiPlatform\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use App\User\Application\Command\RegisterUserCommand;
+use App\User\Application\Service\UserRegistrationService;
+use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Infrastructure\ApiPlatform\Resource\RegisterUserRequest;
 use App\User\Infrastructure\ApiPlatform\Resource\UserResource;
-use App\User\Domain\Contract\UserRepositoryInterface;
-use App\User\Domain\Entity\User;
-use App\User\Domain\Exception\UserAlreadyExistsException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
-
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 /**
  * @implements ProcessorInterface<RegisterUserRequest, UserResource>
  */
 class RegisterProcessor implements ProcessorInterface
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
+        private readonly UserRegistrationService $registrationService,
     ) {
     }
 
@@ -30,20 +27,18 @@ class RegisterProcessor implements ProcessorInterface
         // @phpstan-ignore-next-line instanceof.alwaysTrue
         assert($data instanceof RegisterUserRequest);
 
-        if ($this->userRepository->existsByEmail($data->email)) {
-            throw new ConflictHttpException(
-                UserAlreadyExistsException::withEmail($data->email)->getMessage()
-            );
+        try {
+            $user = $this->registrationService->register(new RegisterUserCommand(
+                email: $data->email,
+                password: $data->password,
+                firstName: $data->firstName,
+                lastName: $data->lastName,
+            ));
+        } catch (UserAlreadyExistsException $e) {
+            throw new UnprocessableEntityHttpException($e->getMessage(), $e);
         }
-
-        $user = User::register(
-            $data->email,
-            $this->passwordHasherFactory->getPasswordHasher(User::class)->hash($data->password),
-            $data->firstName,
-            $data->lastName,
-        );
-        $this->userRepository->save($user);
 
         return UserResource::fromEntity($user);
     }
 }
+
