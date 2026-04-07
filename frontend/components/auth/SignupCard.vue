@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useField, required, email as emailRule, min } from '~/composables/useFieldValidation'
+import { email as emailRule, min, required, useField } from '~/composables/useFieldValidation'
 
 defineProps<{
   loading: boolean

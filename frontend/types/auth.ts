@@ -11,6 +11,11 @@ export interface AuthUser {
 }
 
 export interface SignupResponse {
-  token: string
-  user: AuthUser
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  roles: string[]
+  createdAt: string
+  updatedAt: string
 }
