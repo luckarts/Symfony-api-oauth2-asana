@@ -29,7 +29,7 @@ class RegisterUserTest extends WebTestCase
         $headers = ['CONTENT_TYPE' => 'application/ld+json'];
         $payload = [
             'email' => 'user_' . uniqid() . '@example.com',
-            'password' => 'password123',
+            'password' => 'T3st!P@ss#Api42',
             'firstName' => 'John',
             'lastName' => 'Doe',
         ];
@@ -42,5 +42,22 @@ class RegisterUserTest extends WebTestCase
         // Assertions sur le contenu
         $this->assertArrayHasKey('email', $data);
         $this->assertSame($payload['email'], $data['email']);
+    }
+
+    #[Test]
+    #[Group('e2e')]
+    #[Group('user')]
+    public function register_with_weak_password_returns_422(): void
+    {
+        $headers = ['CONTENT_TYPE' => 'application/ld+json'];
+        $payload = [
+            'email' => 'user_' . uniqid() . '@example.com',
+            'password' => 'password123',
+            'firstName' => 'John',
+            'lastName' => 'Doe',
+        ];
+        $this->client->request('POST', '/api/users', [], [], $headers, json_encode($payload));
+
+        $this->assertSame(Response::HTTP_UNPROCESSABLE_ENTITY, $this->client->getResponse()->getStatusCode());
     }
 }

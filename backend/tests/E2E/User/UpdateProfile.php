@@ -14,7 +14,7 @@ class LoginUserTest extends AbstractApiTestCase
  
  public function update_profile_success(): void
     {
-        $token = $this->authenticate('update@example.com', 'password123', 'John', 'Doe');
+        $token = $this->authenticate('update@example.com', 'T3st!P@ss#Api42', 'John', 'Doe');
         
 
         $response = $this->apiRequest('PUT', '/api/user/profile', $token, [
