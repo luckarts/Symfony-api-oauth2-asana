@@ -132,6 +132,12 @@ jobs:
           APP_ENV: test
           DATABASE_URL: postgresql://app:test@127.0.0.1:5432/app
 
+      - name: Validate migrations (dry-run)
+        run: php bin/console doctrine:migrations:migrate --dry-run --no-interaction --env=test
+        env:
+          APP_ENV: test
+          DATABASE_URL: postgresql://app:test@127.0.0.1:5432/app
+
       - name: Run smoke tests
         run: |
           # Skip gracefully if no tests are annotated @group smoke yet
@@ -269,6 +275,12 @@ jobs:
         run: |
           php bin/console doctrine:database:create --env=test --if-not-exists --no-interaction
           php bin/console doctrine:schema:create --env=test --no-interaction
+        env:
+          APP_ENV: test
+          DATABASE_URL: postgresql://app:test@127.0.0.1:5432/app
+
+      - name: Validate migrations (dry-run)
+        run: php bin/console doctrine:migrations:migrate --dry-run --no-interaction --env=test
         env:
           APP_ENV: test
           DATABASE_URL: postgresql://app:test@127.0.0.1:5432/app
