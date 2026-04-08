@@ -3,7 +3,11 @@ name: Tests
 on:
   push:
     branches: [main, develop]
+    paths:
+      - 'backend/**'
   pull_request:
+    paths:
+      - 'backend/**'
   workflow_dispatch:
     inputs:
       suite:
